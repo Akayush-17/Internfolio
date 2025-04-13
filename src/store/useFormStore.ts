@@ -48,6 +48,7 @@ interface FormState {
   loadFromSupabase: () => Promise<void>;
   publishPortfolio: () => Promise<string>;
   unpublishPortfolio: () => Promise<void>;
+  ensureFormDataLoaded: () => Promise<void>;
 }
 
 // Create the store with persistence
@@ -170,11 +171,13 @@ const useFormStore = create<FormState>()(
         get().saveToSupabase();
       },
 
-      updateProject: (index, project) => {
+      updateProject: (projectIndex, projectData) => {
         set((state) => {
           const updatedProjects = [...state.formData.projects];
-          updatedProjects[index] = { ...updatedProjects[index], ...project };
-
+          updatedProjects[projectIndex] = {
+            ...updatedProjects[projectIndex],
+            ...projectData,
+          };
           return {
             formData: {
               ...state.formData,
@@ -244,7 +247,7 @@ const useFormStore = create<FormState>()(
         get().saveToSupabase();
       },
 
-      removePR: (projectIndex, prIndex) => {
+      removePR: (projectIndex: number, prIndex: number) => {
         set((state) => {
           const updatedProjects = [...state.formData.projects];
           if (
@@ -281,9 +284,11 @@ const useFormStore = create<FormState>()(
 
           set({ isComplete: true, isSubmitting: false });
           return Promise.resolve();
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isSubmitting: false });
-          return Promise.reject(error);
+          const err = error as Error;
+          console.error("Error during form submission:", err);
+          return Promise.reject(err);
         }
       },
 
@@ -339,11 +344,12 @@ const useFormStore = create<FormState>()(
           if (error) throw error;
 
           set({ saveStatus: "success" });
-        } catch (error: any) {
-          console.error("Error saving form data to Supabase:", error);
+        } catch (error: unknown) {
+          const err = error as Error;
+          console.error("Error saving form data to Supabase:", err);
           set({
             saveStatus: "error",
-            saveError: error.message || "Failed to save form data",
+            saveError: err.message || "Failed to save form data",
           });
         }
       },
@@ -397,11 +403,12 @@ const useFormStore = create<FormState>()(
               saveStatus: "success",
             });
           }
-        } catch (error: any) {
-          console.error("Error loading form data from Supabase:", error);
+        } catch (error: unknown) {
+          const err = error as Error;
+          console.error("Error loading form data from Supabase:", err);
           set({
             saveStatus: "error",
-            saveError: error.message || "Failed to load form data",
+            saveError: err.message || "Failed to load form data",
           });
         }
       },
@@ -452,9 +459,10 @@ const useFormStore = create<FormState>()(
           });
 
           return publishedUrl;
-        } catch (error: any) {
-          const errorMessage = error?.message || "Failed to publish portfolio";
-          console.error("Error publishing portfolio:", error, errorMessage);
+        } catch (error: unknown) {
+          const err = error as Error;
+          const errorMessage = err.message || "Failed to publish portfolio";
+          console.error("Error publishing portfolio:", err, errorMessage);
           set({
             saveStatus: "error",
             saveError: errorMessage,
@@ -486,13 +494,31 @@ const useFormStore = create<FormState>()(
             publishedUrl: null,
             saveStatus: "success",
           });
-        } catch (error: any) {
-          console.error("Error unpublishing portfolio:", error);
+        } catch (error: unknown) {
+          const err = error as Error;
+          console.error("Error unpublishing portfolio:", err);
           set({
             saveStatus: "error",
-            saveError: error.message || "Failed to unpublish portfolio",
+            saveError: err.message || "Failed to unpublish portfolio",
           });
-          throw error;
+          throw err;
+        }
+      },
+
+      // Add this new function to check and load data if needed
+      ensureFormDataLoaded: async () => {
+        const { user } = useAuthStore.getState();
+        const { formData } = get();
+
+        // Check if we have a user and if the form data is empty or incomplete
+        if (
+          user &&
+          (!formData.basicInfo.fullName ||
+            formData.projects.length === 0 ||
+            formData.techStack.languages.length === 0)
+        ) {
+          // Form data appears to be empty or incomplete, try to load from Supabase
+          await get().loadFromSupabase();
         }
       },
     }),

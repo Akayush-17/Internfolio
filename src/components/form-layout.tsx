@@ -43,13 +43,16 @@ const FormLayout: React.FC = () => {
             Thank You!
           </h1>
           <p className="text-xl text-center text-gray-700 mb-8">
-            Your developer profile has been submitted successfully.
+            Your Internship work has been submitted successfully.
           </p>
           <div className="flex justify-center mt-10">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => useFormStore.getState().resetForm()}
+              onClick={() => {
+                useFormStore.getState().resetForm();
+                window.location.href = "/portfolio";
+              }}
               className="px-8 py-3 text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl hover:from-blue-600 hover:to-indigo-700 shadow-lg flex items-center space-x-2"
             >
               <svg
@@ -64,7 +67,7 @@ const FormLayout: React.FC = () => {
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Start Over</span>
+              <span>View Portfolio</span>
             </motion.button>
           </div>
         </motion.div>
@@ -191,7 +194,7 @@ const FormLayout: React.FC = () => {
       <div className="w-80 h-full bg-gradient-to-br from-white to-blue-50 border-r border-gray-200 p-8 shadow-xl overflow-y-auto overflow-x-hidden flex-shrink-0">
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-1">
-            Developer Profile
+            Internships Details
           </h2>
           <p className="text-sm text-gray-500">Complete your profile details</p>
 

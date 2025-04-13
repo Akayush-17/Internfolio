@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useFormStore from "@/store/useFormStore";
 
 const BasicInfo: React.FC = () => {
-  const { formData, updateBasicInfo } = useFormStore();
+  const { formData, updateBasicInfo, ensureFormDataLoaded } = useFormStore();
   const { basicInfo } = formData;
   const [newTeammate, setNewTeammate] = useState({ name: "", role: "" });
+
+  useEffect(() => {
+    ensureFormDataLoaded();
+  }, [ensureFormDataLoaded]);
 
   const addTeammate = () => {
     if (newTeammate.name.trim() && newTeammate.role.trim()) {

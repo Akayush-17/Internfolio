@@ -65,8 +65,9 @@ const useAuthStore = create<AuthState>((set, get) => ({
           isLoading: false,
         });
       }
-    } catch (error) {
-      console.error("Auth check error:", error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error("Auth check error:", err);
       set({
         error: "Failed to check authentication status",
         isLoading: false,
@@ -86,10 +87,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (error) throw error;
-    } catch (error: any) {
-      console.error("Google sign-in error:", error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error("Google sign-in error:", err);
       set({
-        error: error.message || "Failed to sign in with Google",
+        error: err.message || "Failed to sign in with Google",
         isLoading: false,
       });
     }
@@ -107,10 +109,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (error) throw error;
-    } catch (error: any) {
-      console.error("GitHub sign-in error:", error);
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error("GitHub sign-in error:", err);
       set({
-        error: error.message || "Failed to sign in with GitHub",
+        error: err.message || "Failed to sign in with GitHub",
         isLoading: false,
       });
     }
@@ -129,9 +132,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: false,
         isLoading: false,
       });
-    } catch (error: any) {
-      console.error("Sign-out error:", error);
-      set({ error: error.message || "Failed to sign out", isLoading: false });
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error("Sign-out error:", err);
+      set({ error: err.message || "Failed to sign out", isLoading: false });
     }
   },
 
@@ -163,9 +167,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
       set({ portfolioId });
 
       return portfolioId;
-    } catch (error: any) {
-      console.error("Error generating portfolio ID:", error);
-      throw error;
+    } catch (error: unknown) {
+      const err = error as Error;
+      console.error("Error generating portfolio ID:", err);
+      throw err;
     }
   },
 }));

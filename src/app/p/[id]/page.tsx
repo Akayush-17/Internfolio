@@ -13,7 +13,7 @@ export default function PublicPortfolioPage({
   const [portfolioData, setPortfolioData] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { id: portfolioId } = React.use(params as any);
+  const { id: portfolioId } = params;
 
   useEffect(() => {
     async function fetchPortfolio() {
@@ -42,9 +42,9 @@ export default function PublicPortfolioPage({
         if (formError) throw formError;
 
         setPortfolioData(formData.form_data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching portfolio:", error);
-        setError(error.message || "Failed to load portfolio");
+        setError((error as Error).message || "Failed to load portfolio");
       } finally {
         setLoading(false);
       }

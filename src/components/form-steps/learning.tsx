@@ -5,6 +5,10 @@ const Learning: React.FC = () => {
   const { formData, updateLearning } = useFormStore();
   const { learning } = formData;
 
+  if (!learning) {
+    return <div>Loading...</div>; 
+  }
+
   // Helper function to handle array updates
   const handleArrayUpdate = (field: keyof typeof learning, value: string) => {
     const currentArray = (learning[field] as string[]) || [];
@@ -12,12 +16,12 @@ const Learning: React.FC = () => {
       ? currentArray.filter((item) => item !== value)
       : [...currentArray, value];
 
-    updateLearning({ [field]: newArray } as any);
+    updateLearning({ [field]: newArray });
   };
 
   // Helper function to handle text input updates
   const handleTextUpdate = (field: keyof typeof learning, value: string) => {
-    updateLearning({ [field]: value } as any);
+    updateLearning({ [field]: value });
   };
 
   // Learning options

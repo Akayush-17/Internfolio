@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import useFormStore from "@/store/useFormStore";
+import useAuthStore from "@/store/auth";
 
 const StepController: React.FC = () => {
   const {
@@ -11,6 +12,7 @@ const StepController: React.FC = () => {
     isSubmitting,
     submitForm,
   } = useFormStore();
+  const { isAuthenticated } = useAuthStore();
 
   const isLastStep = currentStep === totalSteps;
 
