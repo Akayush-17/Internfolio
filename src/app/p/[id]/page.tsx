@@ -1,19 +1,24 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { use } from "react"; 
 import { supabase } from "@/store/auth";
 import { FormData } from "@/types";
 import PublicPortfolioView from "@/components/portfolio/PublicPortfolioView";
 
-type Props = {
-  params: { id: string };
-};
+type ParamsType = Promise<{ id: string }>;
 
-export default function PublicPortfolioPage({ params }: Props) {
+export default function PublicPortfolioPage({
+  params,
+}: {
+  params: ParamsType;
+}) {
+  const { id: portfolioId } = use(params);
+  
   const [portfolioData, setPortfolioData] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { id: portfolioId } = params;
 
   useEffect(() => {
     async function fetchPortfolio() {
@@ -27,12 +32,10 @@ export default function PublicPortfolioPage({ params }: Props) {
 
         if (portfolioError) throw portfolioError;
 
-        // Check if portfolio is published
         if (!portfolioData.is_published) {
           throw new Error("This portfolio is not currently published");
         }
 
-        // Then get the form data for that user
         const { data: formData, error: formError } = await supabase
           .from("intern_forms")
           .select("form_data")
