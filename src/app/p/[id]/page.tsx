@@ -5,11 +5,11 @@ import { supabase } from "@/store/auth";
 import { FormData } from "@/types";
 import PublicPortfolioView from "@/components/portfolio/PublicPortfolioView";
 
-export default function PublicPortfolioPage({
-  params,
-}: {
+type Props = {
   params: { id: string };
-}) {
+};
+
+export default function PublicPortfolioPage({ params }: Props) {
   const [portfolioData, setPortfolioData] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
