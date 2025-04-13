@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { use } from "react"; 
+import { use } from "react";
 import { supabase } from "@/store/auth";
 import { FormData } from "@/types";
 import PublicPortfolioView from "@/components/portfolio/PublicPortfolioView";
@@ -15,7 +14,7 @@ export default function PublicPortfolioPage({
   params: ParamsType;
 }) {
   const { id: portfolioId } = use(params);
-  
+
   const [portfolioData, setPortfolioData] = useState<FormData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,27 +23,36 @@ export default function PublicPortfolioPage({
     async function fetchPortfolio() {
       try {
         // First get the user_id from the portfolio_id
-        const { data: portfolioData, error: portfolioError } = await supabase
-          .from("user_portfolios")
-          .select("user_id, is_published")
-          .eq("portfolio_id", portfolioId)
-          .single();
+        const { data: portfolioDataArray, error: portfolioError } =
+          await supabase
+            .from("user_portfolios")
+            .select("user_id, is_published")
+            .eq("portfolio_id", portfolioId);
 
         if (portfolioError) throw portfolioError;
+
+        if (!portfolioDataArray || portfolioDataArray.length === 0) {
+          throw new Error("Portfolio not found");
+        }
+
+        const portfolioData = portfolioDataArray[0];
 
         if (!portfolioData.is_published) {
           throw new Error("This portfolio is not currently published");
         }
 
-        const { data: formData, error: formError } = await supabase
+        const { data: formDataArray, error: formError } = await supabase
           .from("intern_forms")
           .select("form_data")
-          .eq("user_id", portfolioData.user_id)
-          .single();
+          .eq("user_id", portfolioData.user_id);
 
         if (formError) throw formError;
 
-        setPortfolioData(formData.form_data);
+        if (!formDataArray || formDataArray.length === 0) {
+          throw new Error("Portfolio data not found");
+        }
+
+        setPortfolioData(formDataArray[0].form_data);
       } catch (error: unknown) {
         console.error("Error fetching portfolio:", error);
         setError((error as Error).message || "Failed to load portfolio");
