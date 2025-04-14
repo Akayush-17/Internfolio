@@ -34,7 +34,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
   const tabs = [
     { value: "overview", label: "Overview" },
     { value: "challenges", label: "Challenges" },
-    { value: "pullrequests", label: "Development Timeline" },
+    { value: "pullrequests", label: "Dev Timeline" },
   ];
 
   return (
@@ -68,7 +68,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
               href={project.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center px-3 py-1 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors whitespace-nowrap flex-shrink-0"
+              className="flex items-center px-3 py-1 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors whitespace-nowrap flex-shrink-0 self-start"
             >
               <ExternalLink className="h-3 w-3 mr-1" />
               View Project
@@ -323,7 +323,7 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
   }
 
   return (
-    <section className="py-10 px-8">
+    <section className="md:py-10 py-5 px-4 md:px-8">
       <div className="mb-8 flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-800">
           <span className="border-b-2 border-gray-800 pb-1">Projects</span>

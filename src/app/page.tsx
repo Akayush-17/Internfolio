@@ -72,7 +72,7 @@ export default function LandingPage() {
           type: "spring",
           stiffness: 100,
         }}
-        className="absolute left-4 md:left-16 top-1/3 w-24 md:w-32 lg:w-40"
+        className="absolute left-4 md:left-16 top-1/3 w-24 md:w-32 lg:w-40 md:block hidden"
       />
 
       <motion.img
@@ -86,7 +86,7 @@ export default function LandingPage() {
           type: "spring",
           stiffness: 100,
         }}
-        className="absolute right-4 md:right-16 top-2/3 w-24 md:w-32 lg:w-40"
+        className="absolute right-4 md:right-16 top-2/3 w-24 md:w-32 lg:w-40 md:block hidden"
       />
     </div>
   );

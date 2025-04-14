@@ -10,6 +10,24 @@ import StepController from "./step-controller";
 
 const FormLayout: React.FC = () => {
   const { currentStep, isComplete, goToStep, totalSteps } = useFormStore();
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [isDesktop, setIsDesktop] = React.useState(false);
+
+  // Check if we're on desktop when component mounts (client-side only)
+  React.useEffect(() => {
+    const checkIfDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    // Initial check
+    checkIfDesktop();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", checkIfDesktop);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkIfDesktop);
+  }, []);
 
   // If form is complete, show a success message
   if (isComplete) {
@@ -190,8 +208,54 @@ const FormLayout: React.FC = () => {
   return (
     // Fixed height container with no overflow
     <div className="flex h-screen bg-gray-50 w-full overflow-hidden">
-      {/* Sidebar Navigation - fixed width, height 100% of viewport, with vertical scroll only */}
-      <div className="w-80 h-full bg-gradient-to-br from-white to-blue-50 border-r border-gray-200 p-8 shadow-xl overflow-y-auto overflow-x-hidden flex-shrink-0">
+      {/* Mobile sidebar toggle button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-white shadow-lg text-gray-700 hover:bg-gray-100"
+      >
+        {sidebarOpen ? (
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        )}
+      </button>
+
+      {/* Sidebar Navigation - fixed width on desktop, slide in/out on mobile */}
+      <motion.div
+        className="fixed md:static md:w-80 h-full bg-gradient-to-br from-white to-blue-50 border-r border-gray-200 p-8 shadow-xl overflow-y-auto overflow-x-hidden flex-shrink-0 z-40"
+        initial={{ x: -320 }}
+        animate={{
+          x: sidebarOpen || isDesktop ? 0 : -320,
+        }}
+        transition={{ duration: 0.3 }}
+        style={{ width: "320px" }}
+      >
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-1">
             Internships Details
@@ -322,12 +386,21 @@ const FormLayout: React.FC = () => {
             );
           })}
         </div>
-      </div>
+      </motion.div>
+
+      {/* Overlay for mobile when sidebar is open */}
+      {sidebarOpen && (
+        <motion.div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content - fixed height with controlled overflow */}
       <div className="flex-1 h-full flex flex-col relative overflow-hidden">
-        {/* Fixed controller at top */}
-
         {/* Content container - takes remaining height with controlled overflow */}
         <div className="flex-1 p-6 overflow-hidden flex justify-center">
           <motion.div
@@ -337,19 +410,29 @@ const FormLayout: React.FC = () => {
           >
             {/* Form header - always visible */}
             <div className="p-8 border-b border-gray-200">
-              <motion.div className="flex items-center" layout="position">
-                <motion.div
-                  className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl mr-5 shadow-sm"
-                  layout
-                  key={`icon-${currentStep}`}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {formSteps.find((step) => step.id === currentStep)?.icon}
-                </motion.div>
+              <motion.div
+                className="flex flex-col md:flex-row md:items-center"
+                layout="position"
+              >
+                {/* Step indicator - visible on all screens but styled differently */}
+                <div className="flex items-center mb-3 md:mb-0">
+                  <motion.div
+                    className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl mr-5 shadow-sm"
+                    layout
+                    key={`icon-${currentStep}`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {formSteps.find((step) => step.id === currentStep)?.icon}
+                  </motion.div>
+                  <span className="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded-md md:hidden">
+                    Step {currentStep} of {totalSteps}
+                  </span>
+                </div>
+
                 <motion.h1
-                  className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600"
+                  className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600"
                   layout
                   key={`title-${currentStep}`}
                   initial={{ opacity: 0, x: -20 }}
@@ -363,7 +446,7 @@ const FormLayout: React.FC = () => {
             </div>
 
             {/* Form content - scrollable area */}
-            <div className="flex-1 overflow-y-auto p-8">
+            <div className="flex-1 overflow-y-auto p-4 md:p-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep}
@@ -378,7 +461,7 @@ const FormLayout: React.FC = () => {
             </div>
           </motion.div>
         </div>
-        <div className="p-6 absolute w-full justify-between items-end">
+        <div className="p-1 md:p-6 absolute w-full justify-between items-end mt-10 md:mt-0">
           <StepController />
         </div>
       </div>

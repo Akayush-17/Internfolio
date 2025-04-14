@@ -11,7 +11,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ basicInfo }) => {
     <section className="px-4 py-4 md:px-8 md:py-8">
       <p className="text-2xl mb-4 text-gray-700 font-medium w-full flex items-center flex-wrap gap-2 sm:text-xl">
         Hello! I&apos;m {basicInfo.fullName}
-        <span className="bg-blue-100 p-2 rounded-2xl text-blue-600 flex flex-row gap-2 justify-center items-center text-base sm:text-sm sm:w-full sm:mt-2">
+        <span className="bg-blue-100 p-2 rounded-2xl text-blue-600 flex flex-row gap-2 justify-center items-center text-base sm:text-sm sm:mt-2">
           <Mail size={14} className="text-blue-500" /> {basicInfo.email}
         </span>
       </p>
@@ -44,7 +44,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ basicInfo }) => {
             {basicInfo.teammates.map((teammate, index) => (
               <div
                 key={index}
-                className="bg-gray-100 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow sm:p-3 sm:w-full"
+                className="bg-gray-100 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow sm:p-3"
               >
                 <p className="font-medium text-gray-800">{teammate.name}</p>
               </div>
