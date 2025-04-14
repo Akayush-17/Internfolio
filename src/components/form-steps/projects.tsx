@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import useFormStore from "@/store/useFormStore";
 import { Project, PullRequest } from "@/types";
 import Image from "next/image";
+import useAuthStore, { supabase } from "@/store/auth";
 
 const Projects: React.FC = () => {
   const { formData, addProject, removeProject, addPR, removePR } =
@@ -111,27 +112,68 @@ const Projects: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      
-      // Create a FileReader to convert the file to base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        // reader.result contains the base64 data URL
-        setNewMedia({
-          ...newMedia,
-          file: file,
-          url: reader.result as string, // This will be the base64 string
-          isUpload: true,
+
+      // Create a local preview URL
+      const localPreviewUrl = URL.createObjectURL(file);
+
+      setNewMedia({
+        ...newMedia,
+        file: file,
+        url: localPreviewUrl,
+        isUpload: true,
+      });
+
+      // Upload in background
+      uploadFileToSupabase(file);
+    }
+  };
+
+  const uploadFileToSupabase = async (file: File) => {
+    try {
+      const { user } = useAuthStore.getState();
+
+      if (!user) {
+        console.error("User not authenticated");
+        return;
+      }
+
+      // Create a unique file name to prevent collisions
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}/${Math.random()
+        .toString(36)
+        .substring(2, 15)}_${new Date().getTime()}.${fileExt}`;
+
+      // Upload file to Supabase bucket
+      const { data, error } = await supabase.storage
+        .from("internfolio")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
         });
-      };
-      
-      // Read the file as a data URL (base64)
-      reader.readAsDataURL(file);
+
+      if (error) {
+        throw error;
+      }
+
+      // Get the public URL for the uploaded file
+      const { data: urlData } = supabase.storage
+        .from("internfolio")
+        .getPublicUrl(data.path);
+
+      // Update media with the Supabase URL
+      setNewMedia((prev) => ({
+        ...prev,
+        url: urlData.publicUrl || prev.url,
+      }));
+    } catch (error) {
+      console.error("Error uploading file to Supabase:", error);
+      // We keep the local preview URL if upload fails
     }
   };
 
   const handleAddMedia = (projectIndex: number) => {
     if (
-      (newMedia.isUpload && newMedia.url) || // Changed from checking file to checking url which now contains base64
+      (newMedia.isUpload && newMedia.url) ||
       (!newMedia.isUpload && newMedia.url)
     ) {
       const updatedProjects = [...projects];
@@ -142,11 +184,10 @@ const Projects: React.FC = () => {
       // Create a copy with all required fields explicitly set
       const mediaToAdd = {
         type: newMedia.type,
-        url: newMedia.url || "", // This will be either the external URL or base64 string
+        url: newMedia.url || "", // This will be either the Supabase URL or base64 string as fallback
         caption: newMedia.caption || "",
         isUpload: newMedia.isUpload,
         // We don't need to store the actual file object in the form data
-        // as we've already converted it to base64
       };
 
       updatedProjects[projectIndex].media!.push(mediaToAdd);
@@ -157,7 +198,7 @@ const Projects: React.FC = () => {
 
       setNewMedia({
         type: "image",
-        url: "", 
+        url: "",
         file: undefined,
         caption: "",
         isUpload: false,
@@ -343,6 +384,9 @@ const Projects: React.FC = () => {
                                   src={media.url}
                                   alt={media.caption || "Uploaded image"}
                                   className="max-h-32 rounded-md"
+                                  width={100}
+                                  height={100}
+                                  style={{ objectFit: "contain" }}
                                 />
                               </div>
                             )}
@@ -773,7 +817,11 @@ const Projects: React.FC = () => {
                   onChange={(e) =>
                     setNewPR({
                       ...newPR,
-                      status: e.target.value as "Draft" | "Open" | "Merged" | "Closed",
+                      status: e.target.value as
+                        | "Draft"
+                        | "Open"
+                        | "Merged"
+                        | "Closed",
                     })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -899,10 +947,14 @@ const Projects: React.FC = () => {
                       </p>
                       {newMedia.url && (
                         <div className="mt-2 border border-gray-200 rounded-md p-2">
-                          <Image
+                          <img
                             src={newMedia.url}
                             alt="Preview"
-                            className="max-h-40 mx-auto"
+                            className="max-h-40 mx-auto object-contain"
+                            onError={(e) => {
+                              console.error("Image failed to load", e);
+                              e.currentTarget.style.display = "none";
+                            }}
                           />
                         </div>
                       )}
@@ -916,7 +968,7 @@ const Projects: React.FC = () => {
                   </label>
                   <input
                     type="url"
-                    value={newMedia.url || ""} // Ensure value is never undefined
+                    value={newMedia.url || ""}
                     onChange={(e) =>
                       setNewMedia({ ...newMedia, url: e.target.value })
                     }
@@ -925,12 +977,13 @@ const Projects: React.FC = () => {
                   />
                   {newMedia.url && newMedia.type === "image" && (
                     <div className="mt-2 border border-gray-200 rounded-md p-2">
-                      <Image
+                      <img
                         src={newMedia.url}
                         alt="Preview"
-                        className="max-h-40 mx-auto"
+                        className="max-h-40 mx-auto object-contain"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
+                          console.error("Image failed to load", e);
+                          e.currentTarget.style.display = "none";
                         }}
                       />
                     </div>

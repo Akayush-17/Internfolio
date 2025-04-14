@@ -22,7 +22,6 @@ export default function PublicPortfolioPage({
   useEffect(() => {
     async function fetchPortfolio() {
       try {
-        // First get the user_id from the portfolio_id
         const { data: portfolioDataArray, error: portfolioError } =
           await supabase
             .from("user_portfolios")
