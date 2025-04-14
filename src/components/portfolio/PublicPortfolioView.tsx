@@ -15,13 +15,13 @@ export default function PublicPortfolioView({
 }: PublicPortfolioViewProps) {
   return (
 <div className="w-full min-h-screen font-inter">
-      <nav className="flex justify-between items-center px-16 py-8 md:px-8 md:py-6">
+      <nav className="flex justify-between items-center px-4 py-4 md:px-8 md:py-6">
         <div className="text-3xl font-medium">
           Intern<span className="font-bold">folio</span>
         </div>
         <Link
           href="/"
-          className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 no-underline"
+          className="flex items-center gap-2 bg-white text-black md:px-6 px-4 py-1.5 md:py-3 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 no-underline"
         >
           Get your
           <svg

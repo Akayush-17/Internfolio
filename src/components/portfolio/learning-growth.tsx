@@ -191,16 +191,6 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                 </div>
               </div>
             </div>
-
-            <div className="mt-6 bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-              <p className="text-sm text-indigo-800">
-                <span className="font-medium">Learning Insight:</span> Based on
-                your learning patterns, you&apos;re developing a strong
-                foundation in both technical and soft skills, with a focus on
-                collaborative technologies. Consider exploring more in data
-                science to complement your current skill set.
-              </p>
-            </div>
           </div>
         </div>
       )}

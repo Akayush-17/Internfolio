@@ -40,7 +40,7 @@ const Portfolio = () => {
 
   return (
     <div className="w-full min-h-screen font-inter">
-      <nav className="flex justify-between items-center px-16 py-8 md:px-8 md:py-6">
+      <nav className="flex justify-between items-center px-4 py-4 md:px-8 md:py-6">
         <div className="text-3xl font-medium">
           Intern<span className="font-bold">folio</span>
         </div>

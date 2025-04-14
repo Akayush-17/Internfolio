@@ -228,13 +228,6 @@ const Review: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-        <p className="text-sm text-yellow-800">
-          Please review all information above before submitting. Once submitted,
-          you won&apos;t be able to make changes.
-        </p>
-      </div>
-
       {!isAuthenticated ? (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <p className="text-sm text-blue-800 mb-3">

@@ -8,18 +8,18 @@ interface BasicInfoProps {
 
 const BasicInfo: React.FC<BasicInfoProps> = ({ basicInfo }) => {
   return (
-    <section className="px-16 py-16 md:px-8 md:py-8">
-      <p className="text-2xl mb-4 text-gray-700 font-medium w-full flex items-center flex-wrap">
+    <section className="px-4 py-4 md:px-8 md:py-8">
+      <p className="text-2xl mb-4 text-gray-700 font-medium w-full flex items-center flex-wrap gap-2 sm:text-xl">
         Hello! I&apos;m {basicInfo.fullName}
-        <span className="bg-blue-100 p-2 rounded-2xl text-blue-600 flex flex-row gap-2 justify-center items-center ml-2 text-base">
+        <span className="bg-blue-100 p-2 rounded-2xl text-blue-600 flex flex-row gap-2 justify-center items-center text-base sm:text-sm sm:w-full sm:mt-2">
           <Mail size={14} className="text-blue-500" /> {basicInfo.email}
         </span>
       </p>
-      <h1 className="text-6xl font-bold leading-tight mb-8 max-w-[80%] lg:text-5xl lg:max-w-[90%] md:text-4xl bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+      <h1 className="text-3xl font-bold leading-tight mb-8 max-w-[80%] lg:text-5xl lg:max-w-[90%] md:text-4xl sm:text-3xl sm:max-w-full bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
         {basicInfo.internshipRole} in{" "}
         <span className="text-blue-500">{basicInfo.teamDepartment} Team</span>
       </h1>
-      <div className="text-lg mb-8 text-gray-600 leading-relaxed">
+      <div className="text-lg mb-8 text-gray-600 leading-relaxed sm:text-base">
         {basicInfo.summary ||
           "A passionate designer focused on creating intuitive and beautiful user experiences."}
       </div>
@@ -27,7 +27,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ basicInfo }) => {
       {/* Display contact information */}
       <div className="grid grid-cols-2 gap-6 mb-8 md:grid-cols-1">
         {basicInfo.managerName && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <User size={18} className="text-blue-500" />
             <span className="font-medium text-gray-700">Manager:</span>
             <span className="text-gray-600">{basicInfo.managerName}</span>
@@ -37,14 +37,14 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ basicInfo }) => {
 
       {basicInfo.teammates && basicInfo.teammates.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-xl font-semibold mb-3 border-b pb-2">
+          <h3 className="text-xl font-semibold mb-3 border-b pb-2 sm:text-lg">
             Team Members:
           </h3>
           <div className="flex flex-wrap gap-4">
             {basicInfo.teammates.map((teammate, index) => (
               <div
                 key={index}
-                className="bg-gray-100 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                className="bg-gray-100 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow sm:p-3 sm:w-full"
               >
                 <p className="font-medium text-gray-800">{teammate.name}</p>
               </div>

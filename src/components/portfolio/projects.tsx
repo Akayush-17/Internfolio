@@ -137,7 +137,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
                       {item.type === "image" ||
                       item.type === "diagram" ||
                       item.type === "workflow" ? (
-                        <div className="relative h-56 w-full overflow-hidden">
+                        <div className="relative h-full w-full overflow-hidden">
                           <img
                             src={item.url}
                             alt={item.caption || `${project.title} media`}
