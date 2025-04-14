@@ -109,65 +109,59 @@ const Projects: React.FC = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
 
-      // Create a local preview URL
-      const localPreviewUrl = URL.createObjectURL(file);
+    const file = e.target.files[0];
 
-      setNewMedia({
-        ...newMedia,
-        file: file,
-        url: localPreviewUrl,
-        isUpload: true,
-      });
+    // Create a local preview URL for immediate feedback
+    const localPreviewUrl = URL.createObjectURL(file);
 
-      // Upload in background
-      uploadFileToSupabase(file);
-    }
-  };
+    // Update state with local preview while upload happens
+    setNewMedia({
+      ...newMedia,
+      file,
+      url: localPreviewUrl,
+      isUpload: true,
+    });
 
-  const uploadFileToSupabase = async (file: File) => {
+    // Upload to Supabase
     try {
       const { user } = useAuthStore.getState();
 
       if (!user) {
-        console.error("User not authenticated");
-        return;
+        throw new Error("User not authenticated");
       }
 
-      // Create a unique file name to prevent collisions
+      // Create unique filename to prevent collisions
       const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/${Math.random()
+      const fileName = `${user.id}/${Date.now()}_${Math.random()
         .toString(36)
-        .substring(2, 15)}_${new Date().getTime()}.${fileExt}`;
+        .substring(2, 9)}.${fileExt}`;
 
-      // Upload file to Supabase bucket
+      // Upload to Supabase bucket
       const { data, error } = await supabase.storage
-        .from("internfolio")
+        .from("interfolio")
         .upload(fileName, file, {
           cacheControl: "3600",
           upsert: false,
         });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Get the public URL for the uploaded file
+      // Get the public URL
       const { data: urlData } = supabase.storage
-        .from("internfolio")
+        .from("interfolio")
         .getPublicUrl(data.path);
 
-      // Update media with the Supabase URL
+      // Update media with the permanent Supabase URL
       setNewMedia((prev) => ({
         ...prev,
-        url: urlData.publicUrl || prev.url,
+        url: urlData.publicUrl,
       }));
     } catch (error) {
-      console.error("Error uploading file to Supabase:", error);
-      // We keep the local preview URL if upload fails
+      console.error("Error uploading file:", error);
+      // Keep the local preview URL if upload fails
     }
   };
 

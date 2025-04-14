@@ -1,6 +1,5 @@
 import React from "react";
 import { Project, PullRequest } from "@/types";
-import Image from "next/image";
 import {
   ExternalLink,
   GitPullRequest,
@@ -139,10 +138,9 @@ const ProjectCard = ({ project }: { project: Project }) => {
                       item.type === "diagram" ||
                       item.type === "workflow" ? (
                         <div className="relative h-56 w-full overflow-hidden">
-                          <Image
+                          <img
                             src={item.url}
                             alt={item.caption || `${project.title} media`}
-                            fill
                             className="object-cover"
                           />
                         </div>
