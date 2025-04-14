@@ -141,20 +141,86 @@ const Projects: React.FC = () => {
         .toString(36)
         .substring(2, 9)}.${fileExt}`;
 
-      // Upload to Supabase bucket
+      // First check if the bucket exists
+      const { data: buckets, error: bucketsError } =
+        await supabase.storage.listBuckets();
+
+      if (bucketsError) {
+        console.error("Error listing buckets:", bucketsError);
+        // Continue with local URL only
+        console.log(
+          "Using local file preview only due to bucket listing error"
+        );
+        return;
+      }
+
+      // Check if our target bucket exists
+      const bucketName = "interfolio";
+      const bucketExists = buckets.some((b) => b.name === bucketName);
+
+      if (!bucketExists) {
+        console.warn(`Bucket '${bucketName}' does not exist. Creating it...`);
+
+        try {
+          // Try to create the bucket
+          const { data: newBucket, error: createError } =
+            await supabase.storage.createBucket(bucketName, {
+              public: true,
+            });
+
+          if (createError) {
+            console.error("Failed to create bucket:", createError);
+            // Continue with local URL only
+            console.log(
+              "Using local file preview only due to bucket creation error"
+            );
+            return;
+          }
+
+          console.log("Successfully created bucket:", newBucket);
+        } catch (bucketCreateError) {
+          console.error("Error creating bucket:", bucketCreateError);
+          // Continue with local URL only
+          console.log(
+            "Using local file preview only due to bucket creation error"
+          );
+          return;
+        }
+      }
+
+      // Now try to upload to the bucket
       const { data, error } = await supabase.storage
-        .from("interfolio")
+        .from(bucketName)
         .upload(fileName, file, {
           cacheControl: "3600",
           upsert: false,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase upload error:", error.message, error);
+
+        // Show a more specific error message to the user
+        if (error.message.includes("security policy")) {
+          alert(
+            "Upload failed due to permission issues. Please check if you're logged in."
+          );
+        } else {
+          alert(`Upload failed: ${error.message}`);
+        }
+
+        // Continue with local URL only
+        console.log("Using local file preview only due to upload error");
+        return;
+      }
+
+      console.log("Upload successful, data:", data);
 
       // Get the public URL
       const { data: urlData } = supabase.storage
-        .from("interfolio")
+        .from(bucketName)
         .getPublicUrl(data.path);
+
+      console.log("Public URL:", urlData.publicUrl);
 
       // Update media with the permanent Supabase URL
       setNewMedia((prev) => ({
@@ -162,7 +228,14 @@ const Projects: React.FC = () => {
         url: urlData.publicUrl, // This is the permanent URL
       }));
     } catch (error) {
-      console.error("Error uploading file:", error);
+      // Improved error logging
+      if (error instanceof Error) {
+        console.error("Error uploading file:", error.message, error);
+        alert(`Upload failed: ${error.message}`);
+      } else {
+        console.error("Unknown error uploading file:", error);
+        alert("Upload failed due to an unknown error");
+      }
       // Keep the local preview URL if upload fails
     } finally {
       setIsUploading(false);
