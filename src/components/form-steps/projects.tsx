@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import useFormStore from "@/store/useFormStore";
 import { Project, PullRequest } from "@/types";
 import Image from "next/image";
-import useAuthStore, { supabase } from "@/store/auth";
+import useAuthStore from "@/store/auth";
 
 const Projects: React.FC = () => {
   const { formData, addProject, removeProject, addPR, removePR } =
@@ -128,104 +128,44 @@ const Projects: React.FC = () => {
         isUpload: true,
       });
 
-      // Upload to Supabase
+      // Get authenticated user
       const { user } = useAuthStore.getState();
 
       if (!user) {
         throw new Error("User not authenticated");
       }
 
-      // Create unique filename to prevent collisions
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 9)}.${fileExt}`;
+      // Create a FormData object for Cloudinary upload
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "internfolio"); // Replace with your Cloudinary upload preset
+      formData.append("folder", `interfolio/${user.id}`);
 
-      // First check if the bucket exists
-      const { data: buckets, error: bucketsError } =
-        await supabase.storage.listBuckets();
+      // Upload to Cloudinary
+      const cloudinaryResponse = await fetch(
+        "https://api.cloudinary.com/v1_1/dxhwhhakx/image/upload", // Replace with your Cloudinary cloud name
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-      if (bucketsError) {
-        console.error("Error listing buckets:", bucketsError);
-        // Continue with local URL only
-        console.log(
-          "Using local file preview only due to bucket listing error"
+      if (!cloudinaryResponse.ok) {
+        const errorData = await cloudinaryResponse.json();
+        throw new Error(
+          `Cloudinary upload failed: ${
+            errorData.error?.message || "Unknown error"
+          }`
         );
-        return;
       }
 
-      // Check if our target bucket exists
-      const bucketName = "interfolio";
-      const bucketExists = buckets.some((b) => b.name === bucketName);
+      const cloudinaryData = await cloudinaryResponse.json();
+      console.log("Cloudinary upload successful:", cloudinaryData);
 
-      if (!bucketExists) {
-        console.warn(`Bucket '${bucketName}' does not exist. Creating it...`);
-
-        try {
-          // Try to create the bucket
-          const { data: newBucket, error: createError } =
-            await supabase.storage.createBucket(bucketName, {
-              public: true,
-            });
-
-          if (createError) {
-            console.error("Failed to create bucket:", createError);
-            // Continue with local URL only
-            console.log(
-              "Using local file preview only due to bucket creation error"
-            );
-            return;
-          }
-
-          console.log("Successfully created bucket:", newBucket);
-        } catch (bucketCreateError) {
-          console.error("Error creating bucket:", bucketCreateError);
-          // Continue with local URL only
-          console.log(
-            "Using local file preview only due to bucket creation error"
-          );
-          return;
-        }
-      }
-
-      // Now try to upload to the bucket
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (error) {
-        console.error("Supabase upload error:", error.message, error);
-
-        // Show a more specific error message to the user
-        if (error.message.includes("security policy")) {
-          alert(
-            "Upload failed due to permission issues. Please check if you're logged in."
-          );
-        } else {
-          alert(`Upload failed: ${error.message}`);
-        }
-
-        // Continue with local URL only
-        console.log("Using local file preview only due to upload error");
-        return;
-      }
-
-      console.log("Upload successful, data:", data);
-
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(data.path);
-
-      console.log("Public URL:", urlData.publicUrl);
-
-      // Update media with the permanent Supabase URL
+      // Update media with the permanent Cloudinary URL
       setNewMedia((prev) => ({
         ...prev,
-        url: urlData.publicUrl, // This is the permanent URL
+        url: cloudinaryData.secure_url, // This is the permanent URL
       }));
     } catch (error) {
       // Improved error logging
@@ -1080,7 +1020,9 @@ const Projects: React.FC = () => {
 
               {isUploading && (
                 <div className="my-2 text-center">
-                  <p className="text-blue-600">Uploading file to Supabase...</p>
+                  <p className="text-blue-600">
+                    Uploading file to Cloudinary...
+                  </p>
                   {/* You could add a spinner here */}
                 </div>
               )}
