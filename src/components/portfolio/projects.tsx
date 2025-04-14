@@ -138,19 +138,31 @@ const ProjectCard = ({ project }: { project: Project }) => {
                       item.type === "diagram" ||
                       item.type === "workflow" ? (
                         <div className="relative h-full w-full overflow-hidden">
-                          <img
-                            src={item.url}
-                            alt={item.caption || `${project.title} media`}
-                            className="object-cover"
-                          />
+                          {item.url && !item.url.startsWith("blob:") ? (
+                            <img
+                              src={item.url}
+                              alt={item.caption || `${project.title} media`}
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-48 bg-gray-100 text-gray-500">
+                              <p>Image unavailable</p>
+                            </div>
+                          )}
                         </div>
                       ) : item.type === "video" ? (
                         <div className="relative h-56 w-full overflow-hidden">
-                          <video
-                            src={item.url}
-                            controls
-                            className="w-full h-full object-cover"
-                          />
+                          {item.url && !item.url.startsWith("blob:") ? (
+                            <video
+                              src={item.url}
+                              controls
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-48 bg-gray-100 text-gray-500">
+                              <p>Video unavailable</p>
+                            </div>
+                          )}
                         </div>
                       ) : null}
                       {item.caption && (

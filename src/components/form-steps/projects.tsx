@@ -65,6 +65,7 @@ const Projects: React.FC = () => {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleAddTech = () => {
     if (techInput.trim()) {
@@ -113,20 +114,21 @@ const Projects: React.FC = () => {
     if (!e.target.files || !e.target.files[0]) return;
 
     const file = e.target.files[0];
+    setIsUploading(true);
 
-    // Create a local preview URL for immediate feedback
-    const localPreviewUrl = URL.createObjectURL(file);
-
-    // Update state with local preview while upload happens
-    setNewMedia({
-      ...newMedia,
-      file,
-      url: localPreviewUrl,
-      isUpload: true,
-    });
-
-    // Upload to Supabase
     try {
+      // Create a local preview URL for immediate feedback
+      const localPreviewUrl = URL.createObjectURL(file);
+
+      // Update state with local preview while upload happens
+      setNewMedia({
+        ...newMedia,
+        file,
+        url: localPreviewUrl, // Temporary URL for preview
+        isUpload: true,
+      });
+
+      // Upload to Supabase
       const { user } = useAuthStore.getState();
 
       if (!user) {
@@ -157,18 +159,22 @@ const Projects: React.FC = () => {
       // Update media with the permanent Supabase URL
       setNewMedia((prev) => ({
         ...prev,
-        url: urlData.publicUrl,
+        url: urlData.publicUrl, // This is the permanent URL
       }));
     } catch (error) {
       console.error("Error uploading file:", error);
       // Keep the local preview URL if upload fails
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleAddMedia = (projectIndex: number) => {
+    // Only allow adding if we have a URL and it's not currently uploading
     if (
-      (newMedia.isUpload && newMedia.url) ||
-      (!newMedia.isUpload && newMedia.url)
+      !isUploading &&
+      ((newMedia.isUpload && newMedia.url) ||
+        (!newMedia.isUpload && newMedia.url))
     ) {
       const updatedProjects = [...projects];
       if (!updatedProjects[projectIndex].media) {
@@ -178,10 +184,9 @@ const Projects: React.FC = () => {
       // Create a copy with all required fields explicitly set
       const mediaToAdd = {
         type: newMedia.type,
-        url: newMedia.url || "", // This will be either the Supabase URL or base64 string as fallback
+        url: newMedia.url || "", // This should now be the Supabase URL for uploads
         caption: newMedia.caption || "",
         isUpload: newMedia.isUpload,
-        // We don't need to store the actual file object in the form data
       };
 
       updatedProjects[projectIndex].media!.push(mediaToAdd);
@@ -1000,6 +1005,13 @@ const Projects: React.FC = () => {
                 />
               </div>
 
+              {isUploading && (
+                <div className="my-2 text-center">
+                  <p className="text-blue-600">Uploading file to Supabase...</p>
+                  {/* You could add a spinner here */}
+                </div>
+              )}
+
               <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => setShowMediaModal(false)}
@@ -1014,11 +1026,12 @@ const Projects: React.FC = () => {
                   }
                   className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
                   disabled={
+                    isUploading ||
                     (newMedia.isUpload && !newMedia.file) ||
                     (!newMedia.isUpload && !newMedia.url)
                   }
                 >
-                  Add Media
+                  {isUploading ? "Uploading..." : "Add Media"}
                 </button>
               </div>
             </div>
