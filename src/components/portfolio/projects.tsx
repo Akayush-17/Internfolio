@@ -1,13 +1,15 @@
 import React from "react";
 import { Project, PullRequest } from "@/types";
 import {
-  ExternalLink,
   GitPullRequest,
   Check,
   Clock,
   Calendar,
   User,
   Code,
+  ExternalLink,
+  Tags,
+  FolderKanban,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -122,7 +124,58 @@ const ProjectCard = ({ project }: { project: Project }) => {
                 <p className="text-gray-700">{project.outcome}</p>
               </div>
             )}
+            {project.docs && (
+              <div className="mt-10">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">
+                  Linked Documents
+                </h2>
 
+                <div className="flex flex-wrap gap-6">
+                  {project.docs.map((doc, index) => (
+                    <div key={index} className="relative w-[150px]">
+                      {/* Document Image */}
+                      <div className="w-full h-[200px] rounded-md shadow-md overflow-hidden relative bg-blue-100">
+                        <img
+                          src="/document.png"
+                          alt="Document"
+                          className="w-full h-full object-contain"
+                        />
+
+                        {/* Tag (optional) */}
+                        {doc.tags && (
+                          <div className="absolute top-2 left-2 bg-white/80 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 text-gray-700">
+                            <Tags className="w-3 h-3" />
+                            {doc.tags}
+                          </div>
+                        )}
+
+                        {/* Link (top-right) */}
+                        {doc.link && (
+                          <a
+                            href={doc.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute top-2 right-2 bg-white text-blue-600 p-1 rounded-full shadow hover:bg-blue-50 transition"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Document Info */}
+                      <div className="mt-2 text-center">
+                        <h3 className="text-sm font-semibold text-gray-800 leading-tight">
+                          {doc.documentTitle}
+                        </h3>
+                        <p className="text-xs text-gray-500 line-clamp-2">
+                          {doc.purpose}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {project.media && project.media.length > 0 && (
               <div className="mt-8">
                 <h4 className="font-medium text-gray-800 mb-3 pb-2 border-b">
@@ -219,14 +272,17 @@ const ProjectCard = ({ project }: { project: Project }) => {
                           {challenge.resolution}
                         </p>
                       </div>
-                      <div className="bg-white p-3 rounded border border-gray-200">
-                        <p className="text-xs font-medium text-gray-600 mb-1">
-                          Lessons Learned
-                        </p>
-                        <p className="text-sm text-gray-700">
-                          {challenge.lessonsLearned}
-                        </p>
-                      </div>
+                      {challenge.lessonsLearned && (
+                        <div className="bg-white p-3 rounded border border-gray-200">
+                          <p className="text-xs font-medium text-gray-600 mb-1">
+                            Lessons Learned
+                          </p>
+
+                          <p className="text-sm text-gray-700">
+                            {challenge.lessonsLearned}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -309,6 +365,70 @@ const ProjectCard = ({ project }: { project: Project }) => {
               <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-md border border-gray-200">
                 <GitPullRequest className="h-8 w-8 mx-auto mb-3 text-gray-400" />
                 <p>No pull requests documented for this project.</p>
+              </div>
+            )}
+            {project.tickets && (
+              <div className="mt-10">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">
+                  Project Related Tickets
+                </h2>
+
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
+                  {project.tickets.map((ticket, index) => (
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-lg bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      {/* Header with type and status */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FolderKanban className="w-4 h-4 text-blue-500" />
+                          <span className="text-sm font-medium text-gray-800">
+                            {`Ticket ${index + 1}`}
+                          </span>
+                        </div>
+
+                        {ticket.status && (
+                          <span
+                            className={`text-xs font-medium px-2 py-0.5 rounded-full
+                ${
+                  ticket.status === "Done"
+                    ? "bg-green-100 text-green-700"
+                    : ticket.status === "In Progress"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+                          >
+                            {ticket.status}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-base font-semibold text-gray-900 mb-1">
+                        {ticket.title}
+                      </h3>
+
+                      {/* Contribution */}
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                        {ticket.contribution}
+                      </p>
+
+                      {/* Link */}
+                      {ticket.link && (
+                        <Link
+                          href={ticket.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-sm text-blue-600 hover:underline"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          View in Jira
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

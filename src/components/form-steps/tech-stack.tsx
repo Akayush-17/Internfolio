@@ -46,15 +46,16 @@ const TechStackComp: React.FC = () => {
     }
   };
 
-  // Handle other text area change
-  const handleOtherChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    updateTechStack({ other: e.target.value });
+  // Handle changes for new fields
+  const handleFieldChange = (
+    field: keyof typeof techStack,
+    value: string | number
+  ) => {
+    updateTechStack({ [field]: value } as Partial<TechStack>);
   };
 
   return (
     <div>
-      
-
       <div className="space-y-6">
         <div>
           <h3 className="mb-3 text-lg font-medium">Programming Languages</h3>
@@ -205,13 +206,48 @@ const TechStackComp: React.FC = () => {
         </div>
 
         <div>
-          <h3 className="mb-3 text-lg font-medium">Other (Optional)</h3>
-          <textarea
-            value={techStack.other || ""}
-            onChange={handleOtherChange}
-            placeholder="Any other technologies or skills not covered above"
-            className="w-full p-2 border border-gray-300 rounded h-24"
-          />
+          <h3 className="mb-3 text-lg font-medium">Additional Information</h3>
+          <div className="flex space-x-4">
+            <input
+              type="text"
+              value={techStack.commits || ""}
+              onChange={(e) => handleFieldChange("commits", e.target.value)}
+              placeholder="Commits"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              value={techStack.features || ""}
+              onChange={(e) => handleFieldChange("features", e.target.value)}
+              placeholder="Features"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="number"
+              value={techStack.linesOfCode || ""}
+              onChange={(e) =>
+                handleFieldChange("linesOfCode", Number(e.target.value))
+              }
+              placeholder="Lines of Code"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              value={techStack.contributions || ""}
+              onChange={(e) =>
+                handleFieldChange("contributions", e.target.value)
+              }
+              placeholder="Contributions"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              value={techStack.other || ""}
+              onChange={(e) => handleFieldChange("other", e.target.value)}
+              placeholder="Other"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
         </div>
       </div>
     </div>

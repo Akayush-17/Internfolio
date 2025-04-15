@@ -4,7 +4,6 @@ import useAuthStore from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-// Custom Modal Component
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,7 +13,6 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
-    // Prevent scrolling when modal is open
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
