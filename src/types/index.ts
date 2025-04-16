@@ -21,12 +21,32 @@ export interface TechStack {
   contributions?: string;
 }
 
+export interface TechnicalLearningEntry {
+  title: string;
+  context: string;
+  learning: string;
+}
+
+export interface SoftSkillEntry {
+  title: string;
+  context: string;
+  learning: string;
+}
+
+export interface CollaborationEntry {
+  title: string;
+  context: string;
+  learning: string;
+  teams?: string[];
+}
+
 export interface Learning {
   currentlyLearning: string[];
   interestedIn: string[];
   technicalLearnings?: string;
-  softSkills?: string;
-  crossTeamCollaboration?: string;
+  softSkills?: SoftSkillEntry[];
+  crossTeamCollaboration?: CollaborationEntry[];
+  technicalLearningEntries?: TechnicalLearningEntry[]; 
 }
 
 export interface PullRequest {

@@ -132,9 +132,9 @@ const ProjectCard = ({ project }: { project: Project }) => {
 
                 <div className="flex flex-wrap gap-6">
                   {project.docs.map((doc, index) => (
-                    <div key={index} className="relative w-[150px]">
+                    <div key={index} className="relative w-[100px] md:w-[150px]">
                       {/* Document Image */}
-                      <div className="w-full h-[200px] rounded-md shadow-md overflow-hidden relative bg-blue-100">
+                      <div className="w-full md:h-[200px] h-[120px] rounded-md shadow-md overflow-hidden relative bg-blue-100">
                         <img
                           src="/document.png"
                           alt="Document"
@@ -143,7 +143,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
 
                         {/* Tag (optional) */}
                         {doc.tags && (
-                          <div className="absolute top-2 left-2 bg-white/80 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 text-gray-700">
+                          <div className="absolute md:top-2 md:left-2 left-1 top-[75%] bg-white/80 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 text-gray-700">
                             <Tags className="w-3 h-3" />
                             {doc.tags}
                           </div>
@@ -155,7 +155,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
                             href={doc.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="absolute top-2 right-2 bg-white text-blue-600 p-1 rounded-full shadow hover:bg-blue-50 transition"
+                            className="absolute md:top-2 md:right-2 top-1 right-1 bg-white text-blue-600 p-1 rounded-full shadow hover:bg-blue-50 transition"
                           >
                             <ExternalLink className="w-4 h-4" />
                           </a>
@@ -373,11 +373,11 @@ const ProjectCard = ({ project }: { project: Project }) => {
                   Project Related Tickets
                 </h2>
 
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
                   {project.tickets.map((ticket, index) => (
                     <div
                       key={index}
-                      className="border border-gray-200 rounded-lg bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                      className="border border-gray-200 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition-shadow"
                     >
                       {/* Header with type and status */}
                       <div className="flex items-center justify-between mb-2">

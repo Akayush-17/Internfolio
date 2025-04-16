@@ -27,8 +27,6 @@ const BasicInfo: React.FC = () => {
     updateBasicInfo({ teammates: updatedTeammates });
   };
 
-
-
   return (
     <div className="w-full">
       <div className="space-y-4">
@@ -209,7 +207,7 @@ const BasicInfo: React.FC = () => {
 
           {/* Teammates list */}
           {basicInfo.teammates && basicInfo.teammates.length > 0 ? (
-            <div className="space-y-3">
+            <div className="flex flex-wrap gap-3">
               {basicInfo.teammates.map((teammate, index) => (
                 <div
                   key={index}
@@ -217,7 +215,6 @@ const BasicInfo: React.FC = () => {
                 >
                   <div>
                     <p className="font-medium">{teammate.name}</p>
-                   
                   </div>
                   <div className="flex items-center gap-2">
                     <button
