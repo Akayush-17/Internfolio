@@ -100,10 +100,10 @@ export const validateStep = (
       learning.currentlyLearning.length === 0 &&
       learning.interestedIn.length === 0 &&
       (!learning.technicalLearnings ||
-        learning.technicalLearnings.trim() === "") &&
-      (!learning.softSkills || learning.softSkills.trim() === "") &&
+        learning.technicalLearnings.length === 0) &&
+      (!learning.softSkills || learning.softSkills.length === 0) &&
       (!learning.crossTeamCollaboration ||
-        learning.crossTeamCollaboration.trim() === "")
+        learning.crossTeamCollaboration.length === 0)
     ) {
       errors.learning = {
         general: "Please provide information about your learning experience",
