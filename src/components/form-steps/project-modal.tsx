@@ -1,6 +1,5 @@
 import React from "react";
 import { PullRequest } from "@/types";
-import Image from "next/image";
 
 interface ProjectModalsProps {
   showPRModal: boolean;
@@ -542,7 +541,7 @@ const ProjectModals: React.FC<ProjectModalsProps> = ({
 
                   {newMedia.url && newMedia.type === "image" && (
                     <div className="mt-2">
-                      <Image
+                      <img
                         src={newMedia.url}
                         alt="Preview"
                         width={200}

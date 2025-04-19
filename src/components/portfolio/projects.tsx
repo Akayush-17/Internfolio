@@ -48,16 +48,15 @@ const ProjectCard = ({ project }: { project: Project }) => {
             <h3 className="text-xl font-semibold text-gray-800">
               {project.title}
             </h3>
-            <div className="flex flex-wrap items-start mt-2 text-sm text-gray-600">
-              <div className="flex items- mr-4 mb-1">
-                <User className="h-4 w-4 mr-1 flex-shrink-0" />
-                <span>{project.role}</span>
-              </div>
+            <div className="flex flex-wrap items-start mt-2 gap-3 text-sm text-gray-600">
+            <p className="text-gray-700 leading-relaxed">
+              {project.description}
+            </p>
 
               {project.timelineStart && project.timelineEnd && (
                 <div className="flex items-center mb-1">
-                  <Calendar className="h-4 w-4 mr-1 flex-shrink-0" />
-                  <span>
+                  <Calendar color={"#155dfc"} className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span className="font-semibold text-blue-600">
                     {project.timelineStart} - {project.timelineEnd}
                   </span>
                 </div>
@@ -82,7 +81,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
           {project.technologies.map((tech, index) => (
             <span
               key={index}
-              className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+              className="inline-flex items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
             >
               <Code className="h-3 w-3 mr-1 flex-shrink-0" />
               {tech}
@@ -114,12 +113,14 @@ const ProjectCard = ({ project }: { project: Project }) => {
       <div className="p-6">
         {activeTab === "overview" && (
           <div className="space-y-6">
-            <p className="text-gray-700 leading-relaxed">
-              {project.description}
-            </p>
+             <div className="flex items-start mr-4 mb-2">
+                <User className="h-4 w-4 mr-1 flex-shrink-0" />
+                <span>{project.role}</span>
+              </div>
+           
 
             {project.outcome && (
-              <div className="mt-6 bg-gray-50 p-5 rounded-md border border-gray-200">
+              <div className="mt-6 bg-green-50 p-5 rounded-md border border-gray-200">
                 <h4 className="font-medium text-gray-800 mb-2">Outcome</h4>
                 <p className="text-gray-700">{project.outcome}</p>
               </div>
@@ -132,9 +133,10 @@ const ProjectCard = ({ project }: { project: Project }) => {
 
                 <div className="flex flex-wrap gap-6">
                   {project.docs.map((doc, index) => (
-                    <div key={index} className="relative w-[100px] md:w-[150px]">
+                    <a href={doc.link}
+                    target="_blank" key={index} className="relative w-[100px] md:w-[150px]">
                       {/* Document Image */}
-                      <div className="w-full md:h-[200px] h-[120px] rounded-md shadow-md overflow-hidden relative bg-blue-100">
+                      <div className="w-full md:h-[180px] h-[120px] rounded-md shadow-md overflow-hidden relative bg-blue-100">
                         <img
                           src="/document.png"
                           alt="Document"
@@ -151,14 +153,11 @@ const ProjectCard = ({ project }: { project: Project }) => {
 
                         {/* Link (top-right) */}
                         {doc.link && (
-                          <a
-                            href={doc.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <div
                             className="absolute md:top-2 md:right-2 top-1 right-1 bg-white text-blue-600 p-1 rounded-full shadow hover:bg-blue-50 transition"
                           >
                             <ExternalLink className="w-4 h-4" />
-                          </a>
+                          </div>
                         )}
                       </div>
 
@@ -171,7 +170,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
                           {doc.purpose}
                         </p>
                       </div>
-                    </div>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -181,7 +180,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
                 <h4 className="font-medium text-gray-800 mb-3 pb-2 border-b">
                   Project Media
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
                   {project.media.map((item, index) => (
                     <div
                       key={index}
