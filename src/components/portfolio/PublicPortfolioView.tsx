@@ -44,7 +44,7 @@ export default function PublicPortfolioView({
       </nav>
       
       <BasicInfo basicInfo={data.basicInfo} />
-      <PortfolioStats techStack={data.techStack} />
+      <PortfolioStats projects={data.projects} techStack={data.techStack} />
       <Projects projects={data.projects} />
       <LearningGrowth learning={data.learning} />
     </div>

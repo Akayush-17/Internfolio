@@ -18,7 +18,7 @@ export interface TechStack {
   commits?: string;
   features?: string;
   linesOfCode?: number;
-  contributions?: string;
+  contributions?: number;
 }
 
 export interface TechnicalLearningEntry {

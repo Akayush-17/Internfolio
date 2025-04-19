@@ -207,46 +207,95 @@ const TechStackComp: React.FC = () => {
 
         <div>
           <h3 className="mb-3 text-lg font-medium">Additional Information</h3>
-          <div className="flex space-x-4">
-            <input
-              type="text"
-              value={techStack.commits || ""}
-              onChange={(e) => handleFieldChange("commits", e.target.value)}
-              placeholder="Commits"
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              value={techStack.features || ""}
-              onChange={(e) => handleFieldChange("features", e.target.value)}
-              placeholder="Features"
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-            <input
-              type="number"
-              value={techStack.linesOfCode || ""}
-              onChange={(e) =>
-                handleFieldChange("linesOfCode", Number(e.target.value))
-              }
-              placeholder="Lines of Code"
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              value={techStack.contributions || ""}
-              onChange={(e) =>
-                handleFieldChange("contributions", e.target.value)
-              }
-              placeholder="Contributions"
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              value={techStack.other || ""}
-              onChange={(e) => handleFieldChange("other", e.target.value)}
-              placeholder="Other"
-              className="w-full p-2 border border-gray-300 rounded"
-            />
+          <div className="flex flex-col space-y-4">
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <label
+                  htmlFor="commits"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Commits
+                </label>
+                <input
+                  id="commits"
+                  type="text"
+                  value={techStack.commits || ""}
+                  onChange={(e) => handleFieldChange("commits", e.target.value)}
+                  placeholder="Commits"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="flex-1">
+                <label
+                  htmlFor="features"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Features
+                </label>
+                <input
+                  id="features"
+                  type="text"
+                  value={techStack.features || ""}
+                  onChange={(e) =>
+                    handleFieldChange("features", e.target.value)
+                  }
+                  placeholder="Features"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="flex-1">
+                <label
+                  htmlFor="linesOfCode"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Lines of Code
+                </label>
+                <input
+                  id="linesOfCode"
+                  type="number"
+                  value={techStack.linesOfCode || ""}
+                  onChange={(e) =>
+                    handleFieldChange("linesOfCode", Number(e.target.value))
+                  }
+                  placeholder="Lines of Code"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="flex-1">
+                <label
+                  htmlFor="contributions"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Total Repository 
+                </label>
+                <input
+                  id="contributions"
+                  type="number"
+                  value={techStack.contributions || ""}
+                  onChange={(e) =>
+                    handleFieldChange("contributions", e.target.value)
+                  }
+                  placeholder="Contributions"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="flex-1">
+                <label
+                  htmlFor="other"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Other
+                </label>
+                <input
+                  id="other"
+                  type="text"
+                  value={techStack.other || ""}
+                  onChange={(e) => handleFieldChange("other", e.target.value)}
+                  placeholder="Other"
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

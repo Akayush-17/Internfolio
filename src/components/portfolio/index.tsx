@@ -64,7 +64,7 @@ const Portfolio = () => {
         </Link>
       </nav>
       <BasicInfo basicInfo={formData.basicInfo} />
-      <PortfolioStats techStack={formData.techStack} />
+      <PortfolioStats projects={formData.projects} techStack={formData.techStack} />
       <Projects projects={formData.projects} />
       <LearningGrowth learning={formData.learning} />
       <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-lg max-w-3xl mx-auto">

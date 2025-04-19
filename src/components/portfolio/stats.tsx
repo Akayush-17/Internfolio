@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaCode,
   FaCodeBranch,
@@ -7,7 +7,8 @@ import {
   FaRocket,
   FaLaptopCode,
 } from "react-icons/fa";
-import { TechStack } from "@/types";
+import { GitPullRequest } from "lucide-react";
+import { Project, TechStack, PullRequest } from "@/types";
 
 interface StatItemProps {
   icon: React.ReactNode;
@@ -25,100 +26,222 @@ const StatItem: React.FC<StatItemProps> = ({ icon, value, label }) => (
   </div>
 );
 
+interface ContributionData {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
 interface PortfolioStatsProps {
   techStack: TechStack;
-  stats?: {
-    projects?: number;
-    pullRequests?: number;
-    commits?: number;
-    featuresReleased?: number;
-    linesOfCode?: number;
-    coffeeConsumed?: number;
-  };
-  contributions?: {
-    count: number;
-    data: {
-      date: string;
-      count: number;
-      level: 0 | 1 | 2 | 3 | 4; // 0 = no contributions, 4 = most contributions
-    }[];
-  };
+  projects: Project[];
 }
 
 const PortfolioStats: React.FC<PortfolioStatsProps> = ({
   techStack,
-  stats = {
-    projects: 4,
-    pullRequests: 60,
-    commits: 247,
-    featuresReleased: 5,
-    linesOfCode: 12500,
-  },
-  contributions = {
-    count: 682,
-    data: Array(26 * 7)
-      .fill(0)
-      .map((_, i) => {
-        // Calculate date properly for the last 6 months
-        const today = new Date();
-        const date = new Date(today);
-        date.setDate(today.getDate() - (26 * 7 - i - 1));
+  projects,
+}) => {
+  const [contributionData, setContributionData] = useState<{
+    count: number;
+    data: ContributionData[];
+  }>({ count: 0, data: [] });
+
+  // Calculate total PRs across projects
+  const totalPRs = projects.reduce((count, project) => {
+    return (
+      count +
+      (project.pullRequests?.filter(
+        (pr) => !pr.link?.toLowerCase().includes("commit")
+      )?.length || 0)
+    );
+  }, 0);
+
+  useEffect(() => {
+    calculateContributions();
+  }, [projects]);
+
+  const calculateContributions = () => {
+    // Create a map to store contributions by date
+    const contributionsByDate = new Map<string, number>();
+
+    // Initialize the last 6 months of dates with zero contributions
+    const today = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+    // Fill all dates in the range with 0
+    const currentDate = new Date(sixMonthsAgo);
+    while (currentDate <= today) {
+      const dateString = currentDate.toISOString().split("T")[0];
+      contributionsByDate.set(dateString, 0);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    projects.forEach((project) => {
+      project.pullRequests?.forEach((pr: PullRequest) => {
+        if (pr.date) {
+          const prDate = pr.date.split("T")[0];
+          if (contributionsByDate.has(prDate)) {
+            contributionsByDate.set(
+              prDate,
+              (contributionsByDate.get(prDate) || 0) + 3 // PRs count more
+            );
+          }
+        }
+      });
+
+      // If we had commit data with dates, we could add them here
+      // For now use project start/end dates to simulate commits
+      if (project.timelineStart && project.timelineEnd) {
+        const start = new Date(project.timelineStart);
+        const end = new Date(project.timelineEnd);
+
+        // For each week between start and end, add some random commits
+        const current = new Date(start);
+        while (current <= end && current <= today) {
+          const dateString = current.toISOString().split("T")[0];
+          if (contributionsByDate.has(dateString)) {
+            // More likely to commit on weekdays
+            const dayOfWeek = current.getDay();
+            const isWeekday = dayOfWeek > 0 && dayOfWeek < 6;
+            const commitCount = isWeekday
+              ? Math.floor(Math.random() * 3) + 1
+              : Math.floor(Math.random() * 2);
+
+            contributionsByDate.set(
+              dateString,
+              (contributionsByDate.get(dateString) || 0) + commitCount
+            );
+          }
+          current.setDate(current.getDate() + 1);
+        }
+      }
+    });
+
+    // Convert to array format needed for the heat map
+    const totalContributions = Array.from(contributionsByDate.values()).reduce(
+      (sum, count) => sum + count,
+      0
+    );
+
+    // Find the maximum contribution in a day for normalization
+    const maxContribution = Math.max(
+      ...Array.from(contributionsByDate.values())
+    );
+
+    // Create the final data structure
+    const formattedData = Array.from(contributionsByDate.entries())
+      .map(([date, count]) => {
+        // Normalize the count to a level between 0-4
+        let level: 0 | 1 | 2 | 3 | 4 = 0;
+        if (count > 0) {
+          if (count <= maxContribution * 0.25) level = 1;
+          else if (count <= maxContribution * 0.5) level = 2;
+          else if (count <= maxContribution * 0.75) level = 3;
+          else level = 4;
+        }
 
         return {
-          date: date.toISOString().split("T")[0],
-          count: Math.floor(Math.random() * 10),
-          level: Math.floor(Math.random() * 5) as 0 | 1 | 2 | 3 | 4,
+          date,
+          count,
+          level,
         };
-      }),
-  },
-}) => {
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Get the most recent 26 weeks (182 days) of data for display
+    const last182Days = formattedData.slice(-182);
+
+    setContributionData({
+      count: totalContributions,
+      data: last182Days,
+    });
+  };
+
+  // Organize contribution data into weeks and days for the heatmap
+  const getContributionCalendar = () => {
+    const calendar: ContributionData[][] = [];
+    const data = [...contributionData.data];
+
+    // Ensure we have enough days for a complete 26x7 grid
+    while (data.length < 26 * 7) {
+      const lastDate = data.length > 0 ? new Date(data[0].date) : new Date();
+      lastDate.setDate(lastDate.getDate() - 1);
+      const dateString = lastDate.toISOString().split("T")[0];
+
+      data.unshift({
+        date: dateString,
+        count: 0,
+        level: 0,
+      });
+    }
+
+    // Take only the last 26*7 days
+    const last26Weeks = data.slice(-26 * 7);
+
+    // Group by day of week
+    for (let day = 0; day < 7; day++) {
+      const dayData: ContributionData[] = [];
+      for (let week = 0; week < 26; week++) {
+        const index = week * 7 + day;
+        if (index < last26Weeks.length) {
+          dayData.push(last26Weeks[index]);
+        }
+      }
+      calendar.push(dayData);
+    }
+
+    return calendar;
+  };
+
+  const contributionCalendar = getContributionCalendar();
+
   return (
-    <section className=" ">
+    <section className="">
       <div className="container mx-auto px-4 bg-gray-50 rounded-2xl py-8">
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Stats Section - Now in a column taking ~40% width */}
+          {/* Stats Section */}
           <div className="md:w-2/5">
             <div className="grid grid-cols-2 gap-4">
               <StatItem
-                icon={<FaLaptopCode className="text-blue-500" />}
-                value={stats.projects || 0}
+                icon={<FaRocket className="text-blue-500" />}
+                value={projects?.length}
                 label="Projects"
               />
-
               <StatItem
-                icon={<FaCodeBranch className="text-purple-500" />}
-                value={stats.pullRequests || 0}
-                label="Pull Requests"
-              />
-
-              <StatItem
-                icon={<FaGithub className="text-gray-800" />}
-                value={stats.commits || 0}
+                icon={<FaLaptopCode className="text-blue-500" />}
+                value={techStack.commits || 0}
                 label="Commits"
               />
 
               <StatItem
-                icon={<FaRocket className="text-red-500" />}
-                value={stats.featuresReleased || 0}
+                icon={<FaCodeBranch className="text-purple-500" />}
+                value={techStack.features || 0}
                 label="Features"
               />
 
               <StatItem
                 icon={<FaCode className="text-green-500" />}
-                value={`${Math.floor((stats.linesOfCode || 0) / 1000)}k+`}
+                value={`${Math.floor((techStack.linesOfCode || 0) / 1000)}k+`}
                 label="Lines of Code"
+              />
+
+              <StatItem
+                icon={<GitPullRequest className="text-orange-500" />}
+                value={totalPRs}
+                label="Pull Requests"
               />
             </div>
           </div>
 
-          {/* GitHub Contribution Heatmap - Now in a column taking ~60% width */}
+          {/* GitHub Contribution Heatmap */}
           <div className="md:w-3/5 bg-white rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="text-lg font-semibold">GitHub Contributions</h3>
+                <h3 className="text-lg font-semibold">Contribution Activity</h3>
                 <div className="text-sm text-gray-600">
                   <span className="font-medium text-primary-600">
-                    {contributions.count}
+                    {contributionData.count}
                   </span>{" "}
                   contributions in the last 6 months
                 </div>
@@ -140,37 +263,28 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
               </div>
 
               <div className="w-full">
-                {[0, 1, 2, 3, 4, 5, 6].map((dayOfWeek) => (
+                {contributionCalendar.map((dayData, dayOfWeek) => (
                   <div
                     key={dayOfWeek}
                     className="flex justify-between w-full mb-1"
                   >
-                    {Array.from({ length: 26 }, (_, weekIndex) => {
-                      const dataIndex = weekIndex * 7 + dayOfWeek;
-                      const day = contributions.data[dataIndex] || {
-                        level: 0,
-                        count: 0,
-                        date: "",
-                      };
-
-                      return (
-                        <div
-                          key={weekIndex}
-                          className={`w-3 h-3 rounded-sm ${
-                            day.level === 0
-                              ? "bg-gray-200"
-                              : day.level === 1
-                              ? "bg-green-200"
-                              : day.level === 2
-                              ? "bg-green-300"
-                              : day.level === 3
-                              ? "bg-green-500"
-                              : "bg-green-700"
-                          }`}
-                          title={`${day.count} contributions on ${day.date}`}
-                        />
-                      );
-                    })}
+                    {dayData.map((day, weekIndex) => (
+                      <div
+                        key={weekIndex}
+                        className={`w-3 h-3 rounded-sm ${
+                          day.level === 0
+                            ? "bg-gray-200"
+                            : day.level === 1
+                            ? "bg-green-200"
+                            : day.level === 2
+                            ? "bg-green-300"
+                            : day.level === 3
+                            ? "bg-green-500"
+                            : "bg-green-700"
+                        }`}
+                        title={`${day.count} contributions on ${day.date}`}
+                      />
+                    ))}
                   </div>
                 ))}
               </div>
