@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import PDFGenerator from './index';
+import { FormData } from '@/types';
 
 interface PDFExportButtonProps {
   className?: string;
+  data: FormData;
 }
 
-const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className }) => {
+const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className, data }) => {
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   
   return (
@@ -50,7 +52,7 @@ const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className }) => {
       </button>
       
       {showPdfPreview && (
-        <PDFGenerator onClose={() => setShowPdfPreview(false)} />
+        <PDFGenerator data={data} onClose={() => setShowPdfPreview(false)} />
       )}
     </>
   );

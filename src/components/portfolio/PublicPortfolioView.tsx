@@ -21,7 +21,7 @@ export default function PublicPortfolioView({
           Intern<span className="font-bold">folio</span>
         </div>
         <div className="flex space-x-1.5 md:space-x-3">
-          <PDFExportButton />
+          <PDFExportButton data={data} />
           <Link
             href="/"
             className="flex items-center gap-1 md:gap-2 bg-white text-black md:px-6 px-4 py-1 md:py-3 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 no-underline"

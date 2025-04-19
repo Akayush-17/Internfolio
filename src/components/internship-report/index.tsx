@@ -1,16 +1,16 @@
 "use client"
 import React, { useRef, useEffect, useState } from "react";
-import useFormStore from "@/store/useFormStore";
 import { FormData } from "@/types";
 import { formatDate, calculateDuration } from "@/utils/dateUtils";
 import html2pdf from "html2pdf.js";
 
 interface PDFGeneratorProps {
   onClose?: () => void;
+  data: FormData
 }
 
-const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose }) => {
-  const { formData } = useFormStore();
+const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
+  const formData = data;
   const reportRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
