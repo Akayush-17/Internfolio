@@ -245,12 +245,12 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
 
           {/* Tabs */}
           <div className="border-b border-gray-200">
-            <div className="flex px-6">
+            <div className="flex md:px-6">
               {tabs.map((tab) => (
                 <button
                   key={tab.value}
                   onClick={() => setActiveTab(tab.value)}
-                  className={`px-5 py-3 text-sm font-medium transition-colors relative ${
+                  className={`md:px-5 px-3 py-3 text-sm font-medium transition-colors relative ${
                     activeTab === tab.value
                       ? "text-blue-600 border-b-2 border-blue-600"
                       : "text-gray-600 hover:text-gray-800 hover:border-b-2 hover:border-gray-300"
@@ -296,16 +296,16 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
                         Linked Documents
                       </h2>
 
-                      <div className="flex flex-wrap gap-6">
+                      <div className="md:flex md:flex-wrap grid grid-cols-2  gap-6">
                         {projects[expandedProject].docs.map((doc, index) => (
                           <a
                             href={doc.link}
                             target="_blank"
                             key={index}
-                            className="relative w-[100px] md:w-[150px]"
+                            className="relative  md:w-[150px]"
                           >
                             {/* Document Image */}
-                            <div className="w-full md:h-[180px] h-[120px] rounded-md shadow-md overflow-hidden relative bg-blue-100">
+                            <div className="w-full md:h-[180px]  rounded-md shadow-md overflow-hidden relative bg-blue-100">
                               <img
                                 src="/document.png"
                                 alt="Document"
@@ -563,15 +563,15 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
                 projects[expandedProject].pullRequests.length > 0 ? (
                   <div className="relative py-4">
                     {/* Timeline line */}
-                    <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200"></div>
+                    <div className="absolute left-2 md:left-4 top-0 bottom-0 w-px bg-gray-200"></div>
 
                     <div className="space-y-8">
                       {projects[expandedProject].pullRequests.map(
                         (pr, index) => (
-                          <div key={index} className="relative pl-16">
+                          <div key={index} className="relative pl-8 md:pl-16">
                             {/* Timeline node */}
                             <div
-                              className={`absolute left-0 top-3 h-8 w-8 rounded-full border-2 border-white flex items-center justify-center ${
+                              className={`absolute md:left-0 -left-2 top-3 h-8 w-8 rounded-full border-2 border-white flex items-center justify-center ${
                                 pr.status === "Merged"
                                   ? "bg-green-100"
                                   : pr.status === "Open"

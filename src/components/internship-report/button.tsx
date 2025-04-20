@@ -5,9 +5,10 @@ import { FormData } from '@/types';
 interface PDFExportButtonProps {
   className?: string;
   data: FormData;
+  place?: string;
 }
 
-const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className, data }) => {
+const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className, data, place }) => {
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   
   return (
@@ -33,10 +34,11 @@ const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className, data }) =>
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        <span className='md:block hidden' >  View Report</span>
+        {place === "footer" ? <span className='' >  View Report</span>:  <span className='md:block hidden' >  View Report</span>}
+       
         <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 md:hidden block"
+                className={`h-5 w-5  ${place === "footer" ? "hidden" : "md:hidden block"}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

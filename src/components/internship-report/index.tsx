@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useRef, useEffect, useState } from "react";
 import { FormData } from "@/types";
 import { formatDate, calculateDuration } from "@/utils/dateUtils";
@@ -6,7 +6,7 @@ import html2pdf from "html2pdf.js";
 
 interface PDFGeneratorProps {
   onClose?: () => void;
-  data: FormData
+  data: FormData;
 }
 
 const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
@@ -39,7 +39,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
   };
 
   if (!isMounted) {
-    return null; 
+    return null;
   }
 
   return (
@@ -123,7 +123,6 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </div>
         <p className="text-lg font-bold">{basicInfo.fullName}</p>
         <p className="text-md mb-1">{basicInfo.internshipRole}</p>
-        <p className="text-sm text-gray-600">{basicInfo.email}</p>
       </div>
 
       {/* Table of Contents */}
@@ -148,8 +147,9 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </h2>
         <p className="mb-4 leading-relaxed">
           This report summarizes my internship experience as{" "}
-          <span className="font-semibold">{basicInfo.internshipRole}</span>{" "}
-          at <span className="font-semibold">{basicInfo.teamDepartment}</span>{""}Team.
+          <span className="font-semibold">{basicInfo.internshipRole}</span> at{" "}
+          <span className="font-semibold">{basicInfo.teamDepartment}</span>
+          {""}Team.
         </p>
         <p className="leading-relaxed">{basicInfo.summary}</p>
       </section>
@@ -384,6 +384,88 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
             <p className="text-gray-500 italic">None specified</p>
           )}
         </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-bold mb-2 text-gray-700">
+            Technical Learnings
+          </h3>
+          {learning.technicalLearningEntries &&
+          learning.technicalLearningEntries.length > 0 ? (
+            <ul className="list-disc ml-8 space-y-4">
+              {learning.technicalLearningEntries.map((entry, index) => (
+                <li key={index} className="leading-relaxed">
+                  <h4 className="font-semibold text-gray-800">{entry.title}</h4>
+                  <p className="text-gray-600 mt-2">
+                    <span className="font-bold">Context:</span>{" "}
+                    {entry.context}
+                  </p>
+                  <p className="text-gray-600 mt-2">
+                    <span className="font-bold">Learning:</span>{" "}
+                    {entry.learning}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 italic">None specified</p>
+          )}
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-bold mb-2 text-gray-700">
+            Soft Skills Developed
+          </h3>
+          {learning.softSkills && learning.softSkills?.length > 0 ? (
+            <ul className="list-disc ml-8 space-y-4">
+              {learning.softSkills.map((entry, index) => (
+                <li key={index} className="leading-relaxed">
+                  <h4 className="font-semibold text-gray-800">{entry.title}</h4>
+                  <p className="text-gray-600 mt-2">
+                    <span className="font-bold">Context:</span>{" "}
+                    {entry.context}
+                  </p>
+                  <p className="text-gray-600 mt-2">
+                    <span className="font-bold">Learning:</span>{" "}
+                    {entry.learning}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 italic">None specified</p>
+          )}
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-bold mb-2 text-gray-700">
+            Cross-Team Collaboration
+          </h3>
+          {learning.crossTeamCollaboration && learning.crossTeamCollaboration?.length > 0 ? (
+            <ul className="list-disc ml-8 space-y-4">
+              {learning.crossTeamCollaboration.map((entry, index) => (
+                <li key={index} className="leading-relaxed">
+                  <h4 className="font-semibold text-gray-800">{entry.title}</h4>
+                  <p className="text-gray-600 mt-2">
+                    <span className="font-bold">Context:</span>{" "}
+                    {entry.context}
+                  </p>
+                  <p className="text-gray-600 mt-2">
+                    <span className="font-bold">Learning:</span>{" "}
+                    {entry.learning}
+                  </p>
+                  {entry.teams && entry.teams.length > 0 && (
+                    <p className="text-gray-600 mt-2">
+                      <span className="font-bold">Teams:</span>{" "}
+                      {entry.teams.join(", ")}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 italic">None specified</p>
+          )}
+        </div>
       </section>
 
       {/* Conclusion */}
@@ -394,8 +476,11 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         <p className="leading-relaxed">
           This internship as{" "}
           <span className="font-semibold">{basicInfo.internshipRole}</span> at
-          <span className="font-semibold"> {basicInfo.teamDepartment}</span> has
-          provided valuable professional experience and contributed
+          <span className="font-semibold">
+            {" "}
+            {basicInfo.teamDepartment} Team
+          </span>{" "}
+          has provided valuable professional experience and contributed
           significantly to my career development. I worked on {projects.length}{" "}
           project{projects.length !== 1 ? "s" : ""}, developed skills in
           {techStack.languages.length > 0
