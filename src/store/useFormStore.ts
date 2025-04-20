@@ -5,13 +5,11 @@ import {
   Project,
   PullRequest,
   FormData,
-  AIAnalytics,
 } from "@/types";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { supabase } from "@/store/auth";
 import useAuthStore from "@/store/auth";
-const { generateAnalytics } = await import("@/service/aiAnalyticsService");
 
 interface FormState {
   currentStep: number;
@@ -23,8 +21,6 @@ interface FormState {
   saveError: string | null;
   isPublished: boolean;
   publishedUrl: string | null;
-  isGeneratingAnalytics: boolean;
-
   // Actions
   nextStep: () => void;
   prevStep: () => void;
@@ -49,8 +45,6 @@ interface FormState {
   publishPortfolio: () => Promise<string>;
   unpublishPortfolio: () => Promise<void>;
   ensureFormDataLoaded: () => Promise<void>;
-  generateAIAnalytics: () => Promise<void>;
-  updateAIAnalytics: (data: AIAnalytics) => void;
 }
 
 // Create the store with persistence
@@ -520,51 +514,7 @@ const useFormStore = create<FormState>()(
         ) {
           await get().loadFromSupabase();
         }
-      },
-      generateAIAnalytics: async () => {
-        const { formData } = get();
-
-        if (!formData.basicInfo.fullName) {
-          throw new Error("Please complete your profile information first");
-        }
-
-        set({ isGeneratingAnalytics: true });
-
-        try {
-          const analyticsData = await generateAnalytics(formData);
-
-          const aiAnalytics = {
-            ...analyticsData,
-            lastUpdated: new Date().toISOString(),
-          };
-
-          set((state) => ({
-            formData: {
-              ...state.formData,
-              aiAnalytics,
-            },
-            isGeneratingAnalytics: false,
-          }));
-
-          await get().saveToSupabase();
-        } catch (error: unknown) {
-          set({ isGeneratingAnalytics: false });
-          const err = error as Error;
-          console.error("Error generating AI analytics:", err);
-          throw err;
-        }
-      },
-
-      updateAIAnalytics: (aiAnalytics) => {
-        set((state) => ({
-          formData: {
-            ...state.formData,
-            aiAnalytics,
-          },
-        }));
-
-        get().saveToSupabase();
-      },
+      }
     }),
     {
       name: "form-storage",

@@ -101,31 +101,9 @@ export interface Project {
   docs?: Docs[];
 }
 
-export interface SkillDistribution {
-  category: string;
-  percentage: number;
-  color: string;
-}
-
-export interface GrowthData {
-  month: string;
-  value: number;
-}
-
-export interface AIAnalytics {
-  skillDistribution: SkillDistribution[];
-  growthTrajectory: GrowthData[];
-  keyInsights: string[];
-  strengths: string[];
-  areasForImprovement: string[];
-  recommendedLearningPaths: string[];
-  lastUpdated?: string;
-}
-
 export interface FormData {
   basicInfo: BasicInfo;
   techStack: TechStack;
   learning: Learning;
   projects: Project[];
-  aiAnalytics?: AIAnalytics;
 }
