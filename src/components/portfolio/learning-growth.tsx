@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Book, BookOpen, Users, Code, Lightbulb, ChevronDown, ChevronUp, PieChart, BarChart, Info } from "lucide-react";
+import { Book, BookOpen, Users, Code, ChevronDown, ChevronUp, PieChart, Network } from "lucide-react";
 import { Learning } from "@/types";
 
 interface LearningGrowthProps {
@@ -16,7 +16,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
   });
   
   // State for chart view (distribution vs growth)
-  const [activeChartView, setActiveChartView] = useState<'distribution' | 'growth'>('distribution');
+  // const [activeChartView, setActiveChartView] = useState<'distribution' | 'growth'>('distribution');
 
   // Toggle section visibility
   const toggleSection = (section: string) => {
@@ -27,10 +27,10 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
   };
 
   // Calculate skill totals for the chart
-  const skillTotal = (learning.currentlyLearning?.length || 0) + (learning.interestedIn?.length || 0);
+  // const skillTotal = (learning.currentlyLearning?.length || 0) + (learning.interestedIn?.length || 0);
   
   // Accessibility function to announce percentage
-  const getAriaValueText = (value: number) => `${value} percent`;
+  // const getAriaValueText = (value: number) => `${value} percent`;
 
   const renderTechnicalLearnings = () => {
     if (learning.technicalLearningEntries && learning.technicalLearningEntries.length > 0) {
@@ -60,7 +60,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
             <div key={index} className="mb-6">
               <h4 className="text-lg font-medium text-gray-800 mb-2">{entry.title}</h4>
               <p className="text-gray-700 mb-3">{entry.context}</p>
-              <div className="bg-gray-50 p-4 rounded-md border-l-4 border-indigo-500">
+              <div className="bg-gray-50 p-4 rounded-md border-l-4 border-blue-500">
                 <h5 className="font-medium text-gray-800 mb-1">Soft Skills Learning:</h5>
                 <p className="text-gray-700">{entry.learning}</p>
               </div>
@@ -80,11 +80,11 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
             <div key={index} className="mb-6">
               <h4 className="text-lg font-medium text-gray-800 mb-2">{entry.title}</h4>
               <p className="text-gray-700 mb-3">{entry.context}</p>
-              <div className="bg-gray-50 p-4 rounded-md border-l-4 border-indigo-500">
+              <div className="bg-gray-50 p-4 rounded-md border-l-4 border-amber-500">
                 <h5 className="font-medium text-gray-800 mb-1">Collaboration Learning:</h5>
                 <p className="text-gray-700">{entry.learning}</p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {entry.teams && entry.teams.map((team, index) => (
                   <div key={index} className="bg-gray-100 px-2 py-1 rounded-md text-sm">
                     {team}
@@ -131,14 +131,14 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                     <Book className="h-4 w-4 mr-2" aria-hidden="true" />
                     Current Focus ({learning.currentlyLearning.length})
                   </h4>
-                  <button 
+                  {/* <button 
                     type="button"
                     className="text-blue-700 hover:text-blue-900 text-sm font-medium"
                     onClick={() => {}}
                     aria-label="View all current skills"
                   >
                     View all
-                  </button>
+                  </button> */}
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
@@ -167,14 +167,14 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                     <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" />
                     Future Goals ({learning.interestedIn.length})
                   </h4>
-                  <button 
+                  {/* <button 
                     type="button"
                     className="text-purple-700 hover:text-purple-900 text-sm font-medium"
                     onClick={() => {}}
                     aria-label="View all future learning goals"
                   >
                     View all
-                  </button>
+                  </button> */}
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
@@ -265,7 +265,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                 aria-controls="collaboration-content"
               >
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 text-amber-600 mr-3" aria-hidden="true" />
+                  <Network className="h-5 w-5 text-amber-600 mr-3" aria-hidden="true" />
                   <h3 className="text-lg font-medium text-gray-800">Cross-Team Collaboration</h3>
                 </div>
                 {expandedSections.collaboration ? (
@@ -285,7 +285,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
         </div>
 
         {/* Interactive Learning Analytics */}
-        {(skillTotal > 0) && (
+        {/* {(skillTotal > 0) && (
           <div className="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div className="bg-indigo-50 p-4 border-b border-gray-200">
               <div className="flex justify-between items-center">
@@ -294,7 +294,6 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                   <h3 className="text-lg font-medium text-gray-800">Learning Analytics</h3>
                 </div>
                 
-                {/* Toggle between chart views */}
                 <div className="inline-flex rounded-md shadow-sm" role="group">
                   <button
                     type="button"
@@ -406,7 +405,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                       { month: "Jun", value: 70 },
                     ].map((item, index) => (
                       <div key={index} className="flex flex-col items-center group relative">
-                        {/* Tooltip */}
+                       
                         <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="bg-gray-800 text-white text-xs rounded py-1 px-2 pointer-events-none">
                             {item.value}% growth
@@ -428,7 +427,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
               )}
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </section>
   );

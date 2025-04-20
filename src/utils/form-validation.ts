@@ -21,6 +21,10 @@ export interface ValidationErrors {
   projects?: {
     general?: string;
   };
+  aiAnalytics?: {
+    general?: string
+  };
+
 }
 
 export const validateStep = (

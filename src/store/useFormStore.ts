@@ -5,15 +5,14 @@ import {
   Project,
   PullRequest,
   FormData,
+  AIAnalytics,
 } from "@/types";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { supabase } from "@/store/auth";
 import useAuthStore from "@/store/auth";
+const { generateAnalytics } = await import("@/service/aiAnalyticsService");
 
-// Define the types for our form data
-
-// Define the store state and actions
 interface FormState {
   currentStep: number;
   totalSteps: number;
@@ -24,6 +23,7 @@ interface FormState {
   saveError: string | null;
   isPublished: boolean;
   publishedUrl: string | null;
+  isGeneratingAnalytics: boolean;
 
   // Actions
   nextStep: () => void;
@@ -49,11 +49,13 @@ interface FormState {
   publishPortfolio: () => Promise<string>;
   unpublishPortfolio: () => Promise<void>;
   ensureFormDataLoaded: () => Promise<void>;
+  generateAIAnalytics: () => Promise<void>;
+  updateAIAnalytics: (data: AIAnalytics) => void;
 }
 
 // Create the store with persistence
 const useFormStore = create<FormState>()(
-  persist(
+  persist<FormState>(
     (set, get) => ({
       currentStep: 1,
       totalSteps: 5, // Basic Info, Tech Stack, Learning, Projects, Review
@@ -88,6 +90,7 @@ const useFormStore = create<FormState>()(
         },
         projects: [],
       },
+      isGeneratingAnalytics: false,
 
       // Navigation actions
       nextStep: () => {
@@ -505,26 +508,67 @@ const useFormStore = create<FormState>()(
         }
       },
 
-      // Add this new function to check and load data if needed
       ensureFormDataLoaded: async () => {
         const { user } = useAuthStore.getState();
         const { formData } = get();
 
-        // Check if we have a user and if the form data is empty or incomplete
         if (
           user &&
           (!formData.basicInfo.fullName ||
             formData.projects.length === 0 ||
             formData.techStack.languages.length === 0)
         ) {
-          // Form data appears to be empty or incomplete, try to load from Supabase
           await get().loadFromSupabase();
         }
       },
+      generateAIAnalytics: async () => {
+        const { formData } = get();
+
+        if (!formData.basicInfo.fullName) {
+          throw new Error("Please complete your profile information first");
+        }
+
+        set({ isGeneratingAnalytics: true });
+
+        try {
+          const analyticsData = await generateAnalytics(formData);
+
+          const aiAnalytics = {
+            ...analyticsData,
+            lastUpdated: new Date().toISOString(),
+          };
+
+          set((state) => ({
+            formData: {
+              ...state.formData,
+              aiAnalytics,
+            },
+            isGeneratingAnalytics: false,
+          }));
+
+          await get().saveToSupabase();
+        } catch (error: unknown) {
+          set({ isGeneratingAnalytics: false });
+          const err = error as Error;
+          console.error("Error generating AI analytics:", err);
+          throw err;
+        }
+      },
+
+      updateAIAnalytics: (aiAnalytics) => {
+        set((state) => ({
+          formData: {
+            ...state.formData,
+            aiAnalytics,
+          },
+        }));
+
+        get().saveToSupabase();
+      },
     }),
     {
-      name: "form-storage", // unique name for localStorage key
-      storage: createJSONStorage(() => localStorage), // use localStorage
+      name: "form-storage",
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

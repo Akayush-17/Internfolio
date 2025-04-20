@@ -61,10 +61,8 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
   }, [projects]);
 
   const calculateContributions = () => {
-    // Create a map to store contributions by date
     const contributionsByDate = new Map<string, number>();
 
-    // Initialize the last 6 months of dates with zero contributions
     const today = new Date();
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(today.getMonth() - 6);
@@ -84,24 +82,21 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
           if (contributionsByDate.has(prDate)) {
             contributionsByDate.set(
               prDate,
-              (contributionsByDate.get(prDate) || 0) + 3 // PRs count more
+              (contributionsByDate.get(prDate) || 0) + 3 
             );
           }
         }
       });
 
-      // If we had commit data with dates, we could add them here
-      // For now use project start/end dates to simulate commits
+      
       if (project.timelineStart && project.timelineEnd) {
         const start = new Date(project.timelineStart);
         const end = new Date(project.timelineEnd);
 
-        // For each week between start and end, add some random commits
         const current = new Date(start);
         while (current <= end && current <= today) {
           const dateString = current.toISOString().split("T")[0];
           if (contributionsByDate.has(dateString)) {
-            // More likely to commit on weekdays
             const dayOfWeek = current.getDay();
             const isWeekday = dayOfWeek > 0 && dayOfWeek < 6;
             const commitCount = isWeekday
@@ -118,21 +113,17 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
       }
     });
 
-    // Convert to array format needed for the heat map
     const totalContributions = Array.from(contributionsByDate.values()).reduce(
       (sum, count) => sum + count,
       0
     );
 
-    // Find the maximum contribution in a day for normalization
     const maxContribution = Math.max(
       ...Array.from(contributionsByDate.values())
     );
 
-    // Create the final data structure
     const formattedData = Array.from(contributionsByDate.entries())
       .map(([date, count]) => {
-        // Normalize the count to a level between 0-4
         let level: 0 | 1 | 2 | 3 | 4 = 0;
         if (count > 0) {
           if (count <= maxContribution * 0.25) level = 1;
@@ -149,7 +140,6 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Get the most recent 26 weeks (182 days) of data for display
     const last182Days = formattedData.slice(-182);
 
     setContributionData({
@@ -158,12 +148,10 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
     });
   };
 
-  // Organize contribution data into weeks and days for the heatmap
   const getContributionCalendar = () => {
     const calendar: ContributionData[][] = [];
     const data = [...contributionData.data];
 
-    // Ensure we have enough days for a complete 26x7 grid
     while (data.length < 26 * 7) {
       const lastDate = data.length > 0 ? new Date(data[0].date) : new Date();
       lastDate.setDate(lastDate.getDate() - 1);
@@ -176,10 +164,8 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
       });
     }
 
-    // Take only the last 26*7 days
     const last26Weeks = data.slice(-26 * 7);
 
-    // Group by day of week
     for (let day = 0; day < 7; day++) {
       const dayData: ContributionData[] = [];
       for (let week = 0; week < 26; week++) {
@@ -235,7 +221,7 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
           </div>
 
           {/* GitHub Contribution Heatmap */}
-          <div className="md:w-3/5 bg-white rounded-lg shadow p-6">
+          <div className="md:w-3/5 bg-white rounded-lg shadow p-2 md:p-6">
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold">Contribution Activity</h3>
