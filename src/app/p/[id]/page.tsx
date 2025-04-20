@@ -66,7 +66,9 @@ export default function PublicPortfolioPage({
   if (loading) {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-slate-900 text-white">
-        <div className="text-xl">Loading portfolio...</div>
+        <div className="text-3xl font-medium">
+          Intern<span className="font-bold">folio</span>
+        </div>
       </div>
     );
   }

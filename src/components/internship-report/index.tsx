@@ -2,7 +2,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { FormData } from "@/types";
 import { formatDate, calculateDuration } from "@/utils/dateUtils";
-import html2pdf from "html2pdf.js";
 
 interface PDFGeneratorProps {
   onClose?: () => void;
@@ -20,7 +19,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
 
   const generatePDF = async () => {
     if (!reportRef.current || !isMounted) return;
-
+  
     const element = reportRef.current;
     const opt = {
       margin: [20, 20],
@@ -30,13 +29,15 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       pagebreak: { mode: ["avoid-all", "css", "legacy"] },
     };
-
+  
     try {
+      const html2pdf = (await import("html2pdf.js")).default;
       html2pdf().from(element).set(opt).save();
     } catch (error) {
       console.error("Error generating PDF:", error);
     }
   };
+  
 
   if (!isMounted) {
     return null;

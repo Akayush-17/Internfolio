@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react';
 import PDFGenerator from './index';
 import { FormData } from '@/types';
