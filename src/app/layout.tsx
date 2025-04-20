@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GoogleAnalytics from "@/components/google-analytics";
 
 export const metadata: Metadata = {
   title: "Interfolio",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head />
+      <body>
+        <GoogleAnalytics />
+        {children}
+      </body>
     </html>
   );
 }

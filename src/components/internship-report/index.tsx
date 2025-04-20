@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { FormData } from "@/types";
 import { formatDate, calculateDuration } from "@/utils/dateUtils";
 import "../../app/globals.css";
+import { event as gaEvent } from "@/lib/gtag";
 
 interface PDFGeneratorProps {
   onClose?: () => void;
@@ -126,7 +127,14 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
           <h2 className="text-xl font-semibold">Internship Report Preview</h2>
           <div className="flex gap-3">
             <button
-              onClick={generatePDF}
+              onClick={() => {
+                generatePDF();
+                gaEvent({
+                  action: "click",
+                  category: "Portfolio Button",
+                  label: "Download Report",
+                });
+              }}
               disabled={isGenerating}
               className={`md:px-4 md:py-2 px-2 py-1 bg-blue-2001 text-blue-9001 rounded-xl hover:bg-blue-3001 transition-colors flex items-center gap-2 ${
                 isGenerating ? "opacity-70 cursor-not-allowed" : ""
@@ -178,7 +186,14 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
             </button>
             {onClose && (
               <button
-                onClick={onClose}
+                onClick={() => {
+                  onClose();
+                  gaEvent({
+                    action: "click",
+                    category: "Portfolio Button",
+                    label: "close preview",
+                  });
+                }}
                 className="px-4 py-2 bg-gray-2001 rounded-xl hover:bg-gray-300 transition-colors"
                 disabled={isGenerating}
               >
@@ -506,7 +521,9 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
             <ul className="list-disc ml-8 space-y-4">
               {learning.technicalLearningEntries.map((entry, index) => (
                 <li key={index} className="leading-relaxed">
-                  <h4 className="font-semibold text-gray-8001">{entry.title}</h4>
+                  <h4 className="font-semibold text-gray-8001">
+                    {entry.title}
+                  </h4>
                   <p className="text-gray-6001 mt-2">
                     <span className="font-bold">Context:</span> {entry.context}
                   </p>
@@ -530,7 +547,9 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
             <ul className="list-disc ml-8 space-y-4">
               {learning.softSkills.map((entry, index) => (
                 <li key={index} className="leading-relaxed">
-                  <h4 className="font-semibold text-gray-8001">{entry.title}</h4>
+                  <h4 className="font-semibold text-gray-8001">
+                    {entry.title}
+                  </h4>
                   <p className="text-gray-6001 mt-2">
                     <span className="font-bold">Context:</span> {entry.context}
                   </p>
@@ -555,7 +574,9 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
             <ul className="list-disc ml-8 space-y-4">
               {learning.crossTeamCollaboration.map((entry, index) => (
                 <li key={index} className="leading-relaxed">
-                  <h4 className="font-semibold text-gray-8001">{entry.title}</h4>
+                  <h4 className="font-semibold text-gray-8001">
+                    {entry.title}
+                  </h4>
                   <p className="text-gray-6001 mt-2">
                     <span className="font-bold">Context:</span> {entry.context}
                   </p>

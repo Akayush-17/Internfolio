@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { RocketIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { event as gaEvent } from "@/lib/gtag";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -38,7 +39,14 @@ export default function LandingPage() {
         <Button
           size="lg"
           className="text-lg px-6 py-4 border border-white cursor-pointer group hover:bg-white hover:text-slate-900 btn-hover-effect"
-          onClick={() => router.push("/form")}
+          onClick={() => {
+            router.push("/form");
+            gaEvent({
+              action: "click",
+              category: "Portfolio Button",
+              label: "Start My Report",
+            });
+          }}
         >
           <RocketIcon className="mr-2 h-5 w-5 transition-all duration-300 group-hover:animate-rocket" />
           <span className="group-hover:text-slate-900 transition-all duration-300">
