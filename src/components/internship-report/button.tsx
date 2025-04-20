@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import PDFGenerator from './index';
 import { FormData } from '@/types';
-import { event as gaEvent } from "@/lib/gtag";
+import { trackEvent } from "@/lib/mixpanel";
 
 interface PDFExportButtonProps {
   className?: string;
@@ -17,11 +17,10 @@ const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className, data, plac
     <>
       <button
         onClick={() => {setShowPdfPreview(true); 
-            gaEvent({
-            action: "click",
-            category: "Portfolio Button",
-            label: "View Report",
-          });}}
+            trackEvent("view_report_clicked", {
+                category: "Portfolio Button",
+                label: "view_report_clicked",
+              });}}
         className={`flex items-center md:gap-2 gap-1 bg-white text-black px-4 py-2 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 ${className || ''}`}
       >
         <svg 

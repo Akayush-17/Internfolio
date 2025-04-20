@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { FormData } from "@/types";
 import { formatDate, calculateDuration } from "@/utils/dateUtils";
 import "../../app/globals.css";
-import { event as gaEvent } from "@/lib/gtag";
+import { trackEvent } from "@/lib/mixpanel";
 
 interface PDFGeneratorProps {
   onClose?: () => void;
@@ -128,12 +128,12 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
           <div className="flex gap-3">
             <button
               onClick={() => {
-                generatePDF();
-                gaEvent({
-                  action: "click",
-                  category: "Portfolio Button",
-                  label: "Download Report",
-                });
+                trackEvent("generate_pdf_clicked", {
+                    category: "Portfolio Button",
+                    label: "generate_pdf_clicked",
+                  });
+                generatePDF()
+                
               }}
               disabled={isGenerating}
               className={`md:px-4 md:py-2 px-2 py-1 bg-blue-2001 text-blue-9001 rounded-xl hover:bg-blue-3001 transition-colors flex items-center gap-2 ${
@@ -187,12 +187,12 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
             {onClose && (
               <button
                 onClick={() => {
-                  onClose();
-                  gaEvent({
-                    action: "click",
-                    category: "Portfolio Button",
-                    label: "close preview",
-                  });
+                    trackEvent("close_preview_clicked", {
+                        category: "Portfolio Button",
+                        label: "close_preview_clicked",
+                      });
+                  onClose()
+                 
                 }}
                 className="px-4 py-2 bg-gray-2001 rounded-xl hover:bg-gray-300 transition-colors"
                 disabled={isGenerating}

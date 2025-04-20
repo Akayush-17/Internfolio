@@ -7,7 +7,7 @@ import Projects from "./projects";
 import LearningGrowth from "./learning-growth";
 import Link from "next/link";
 import PDFExportButton from "../internship-report/button";
-import { event as gaEvent } from "@/lib/gtag";
+import { trackEvent } from "@/lib/mixpanel";
 
 interface PublicPortfolioViewProps {
   data: FormData;
@@ -27,11 +27,10 @@ export default function PublicPortfolioView({
           <Link
             href="/"
             onClick={() => 
-              gaEvent({
-              action: "click",
-              category: "Portfolio Button",
-              label: "get your clicked",
-            })}
+              trackEvent("get_your_clicked", {
+                category: "Portfolio Button",
+                label: "get_your_clicked",
+              })}
             className="flex items-center gap-1 md:gap-2 bg-white text-black md:px-6 px-4 py-1 md:py-3 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 no-underline"
           >
             Get your
@@ -63,12 +62,13 @@ export default function PublicPortfolioView({
           <PDFExportButton place={"footer"} data={data} />
           <Link
             href="/"
-            onClick={() => 
-              gaEvent({
-              action: "click",
-              category: "Portfolio Button",
-              label: "Create New clicked",
-            })}
+            onClick={() => {
+              console.log('Button clicked!');
+           
+              trackEvent("create_new_clicked", {
+                category: "Portfolio Button",
+                label: "create_new_clicked",
+              }); }}
             className="flex items-center gap-1 md:gap-2 bg-white text-black md:px-6 px-4 py-1 md:py-3 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 no-underline"
           >
             Create New
