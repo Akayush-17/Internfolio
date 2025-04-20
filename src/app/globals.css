@@ -20,4 +20,116 @@
   transform: scale(1.05);
 }
 
+/* Override Tailwind colors that might use oklch with standard RGB equivalents */
+:root {
+  --tw-text-opacity: 1;
+  --tw-bg-opacity: 1;
+  --tw-border-opacity: 1;
+}
 
+/* Standard color overrides */
+.text-black1 {
+  color: rgb(0, 0, 0) !important;
+}
+
+.text-white1 {
+  color: rgb(255, 255, 255) !important;
+}
+
+.text-gray-501 {
+  color: rgb(249, 250, 251) !important;
+}
+
+.text-gray-1001 {
+  color: rgb(243, 244, 246) !important;
+}
+
+.text-gray-2001 {
+  color: rgb(229, 231, 235) !important;
+}
+
+.text-gray-3001 {
+  color: rgb(209, 213, 219) !important;
+}
+
+.text-gray-4001 {
+  color: rgb(156, 163, 175) !important;
+}
+
+.text-gray-5001 {
+  color: rgb(107, 114, 128) !important;
+}
+
+.text-gray-6001 {
+  color: rgb(75, 85, 99) !important;
+}
+
+.text-gray-7001 {
+  color: rgb(55, 65, 81) !important;
+}
+
+.text-gray-8001 {
+  color: rgb(31, 41, 55) !important;
+}
+
+.text-gray-9001 {
+  color: rgb(17, 24, 39) !important;
+}
+
+.text-blue-501 {
+  color: rgb(239, 246, 255) !important;
+}
+
+.text-blue-7001 {
+  color: rgb(29, 78, 216) !important;
+}
+
+.text-blue-9001 {
+  color: rgb(30, 58, 138) !important;
+}
+
+/* Background colors */
+.bg-white1 {
+  background-color: rgb(255, 255, 255) !important;
+}
+
+.bg-black1 {
+  background-color: rgb(0, 0, 0) !important;
+}
+
+.bg-gray-501 {
+  background-color: rgb(249, 250, 251) !important;
+}
+
+.bg-gray-1001 {
+  background-color: rgb(243, 244, 246) !important;
+}
+
+.bg-gray-2001 {
+  background-color: rgb(229, 231, 235) !important;
+}
+
+.bg-blue-501 {
+  background-color: rgb(239, 246, 255) !important;
+}
+
+.bg-blue-2001 {
+  background-color: rgb(191, 219, 254) !important;
+}
+
+.bg-blue-3001 {
+  background-color: rgb(147, 197, 253) !important;
+}
+
+.bg-opacity-601 {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Border colors */
+.border-gray-1001 {
+  border-color: rgb(243, 244, 246) !important;
+}
+
+.border-gray-2001 {
+  border-color: rgb(229, 231, 235) !important;
+}
