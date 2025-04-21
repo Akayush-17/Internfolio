@@ -21,7 +21,7 @@ const PDFExportButton: React.FC<PDFExportButtonProps> = ({ className, data, plac
                 category: "Portfolio Button",
                 label: "view_report_clicked",
               });}}
-        className={`flex items-center md:gap-2 gap-1 bg-white text-black px-4 py-2 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 ${className || ''}`}
+        className={`flex items-center md:gap-2 gap-1 bg-slate-900 text-white px-4 py-2 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 ${className || ''}`}
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
