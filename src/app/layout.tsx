@@ -3,7 +3,7 @@ import "./globals.css";
 import MixpanelAnalytics from "@/components/mixpanel";
 
 export const metadata: Metadata = {
-  title: "Interfolio",
+  title: "Internfolio",
   description: "Create report for internship review nice and smooth",
 };
 
