@@ -1,4 +1,4 @@
-#!/bin/bash
+
 
 # ---
 # A script to automate the initial project setup steps based on the guide.
