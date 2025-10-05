@@ -6,6 +6,7 @@ interface GitHubData {
   repositories: GitHubRepository[];
   languages: { [key: string]: number };
   frameworks: string[];
+  tools: string[];
   lastFetched: string | null;
   isLoading: boolean;
   error: string | null;
@@ -17,6 +18,7 @@ interface GitHubStore {
   setRepositories: (repositories: GitHubRepository[]) => void;
   setLanguages: (languages: { [key: string]: number }) => void;
   setFrameworks: (frameworks: string[]) => void;
+  setTools: (tools: string[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearData: () => void;
@@ -27,6 +29,7 @@ const initialState: GitHubData = {
   repositories: [],
   languages: {},
   frameworks: [],
+  tools: [],
   lastFetched: null,
   isLoading: false,
   error: null,
@@ -62,6 +65,16 @@ export const useGitHubStore = create<GitHubStore>()(
           data: {
             ...state.data,
             frameworks,
+            lastFetched: new Date().toISOString(),
+            error: null,
+          },
+        })),
+
+      setTools: (tools) =>
+        set((state) => ({
+          data: {
+            ...state.data,
+            tools,
             lastFetched: new Date().toISOString(),
             error: null,
           },
@@ -108,6 +121,7 @@ export const useGitHubStore = create<GitHubStore>()(
           repositories: state.data.repositories,
           languages: state.data.languages,
           frameworks: state.data.frameworks,
+          tools: state.data.tools,
           lastFetched: state.data.lastFetched,
           isLoading: false,
           error: null,
