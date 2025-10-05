@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import useFormStore from "@/store/useFormStore";
 import { TechStack } from "@/types";
 import useAuthStore from "@/store/auth";
-import { supabase } from "@/store/auth";
 import { showToast } from "@/components/ui/toast";
 import { useGitHubStore } from "@/store/githubStore";
+import { apiService } from "@/services/api";
 
 const TechStackComp: React.FC = () => {
   const { formData, updateTechStack } = useFormStore();
@@ -14,6 +14,7 @@ const TechStackComp: React.FC = () => {
     data: githubData, 
     setRepositories, 
     setLanguages, 
+    setFrameworks,
     setLoading, 
     setError, 
     isDataStale 
@@ -23,6 +24,7 @@ const TechStackComp: React.FC = () => {
   const [frameworkInput, setFrameworkInput] = useState("");
   const [toolInput, setToolInput] = useState("");
   const [isLoadingGitHub, setIsLoadingGitHub] = useState(false);
+  const [isLoadingFrameworks, setIsLoadingFrameworks] = useState(false);
 
   const handleAddTag = (field: keyof typeof techStack, value: string) => {
     if (!value.trim()) return;
@@ -84,11 +86,20 @@ const TechStackComp: React.FC = () => {
         } as Partial<TechStack>);
       }
 
+      const currentFrameworks = techStack.frameworks;
+      const newFrameworks = githubData.frameworks.filter(framework => !currentFrameworks.includes(framework));
+      
+      if (newFrameworks.length > 0) {
+        updateTechStack({
+          frameworks: [...currentFrameworks, ...newFrameworks]
+        } as Partial<TechStack>);
+      }
+
       updateTechStack({
         contributions: githubData.repositories.length
       } as Partial<TechStack>);
 
-      showToast(`Loaded ${newLanguages.length} new languages from ${githubData.repositories.length} cached repositories!`, 'success');
+      showToast(`Loaded ${newLanguages.length} languages and ${newFrameworks.length} frameworks from ${githubData.repositories.length} repositories!`, 'success');
       return;
     }
 
@@ -97,67 +108,28 @@ const TechStackComp: React.FC = () => {
     setError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const repositoriesResult = await apiService.getRepositories();
       
-      if (!session?.provider_token) {
-        showToast("GitHub token not found. Please sign in with GitHub (not Google) to use this feature.", 'error');
-        setError("GitHub token not found");
+      if (!repositoriesResult.success) {
+        showToast(repositoriesResult.error || "Failed to fetch repositories", 'error');
+        setError(repositoriesResult.error || "Failed to fetch repositories");
         return;
       }
 
-      const response = await fetch("/api/github/repositories", {
-        headers: {
-          "Authorization": `Bearer ${session.provider_token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch repositories");
-      }
-
-      const data = await response.json();
-      
-      if (data.success && data.data.length > 0) {
-        const repositories = data.data;
+      if (repositoriesResult.data && repositoriesResult.data.length > 0) {
+        const repositories = repositoriesResult.data;
         setRepositories(repositories);
 
-        const languagePromises = repositories.map(async (repo: any) => {
-          try {
-            const langResponse = await fetch("/api/github/languages", {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${session.provider_token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                repositories: [{ owner: repo.owner.login, name: repo.name }]
-              }),
-            });
-            
-            if (langResponse.ok) {
-              const langData = await langResponse.json();
-              return langData.data?.languages || {};
-            }
-            return {};
-          } catch (error) {
-            return {};
-          }
-        });
-
-        const languageResults = await Promise.all(languagePromises);
-        const allLanguages: { [key: string]: number } = {};
-        
-        languageResults.forEach(languages => {
-          Object.entries(languages).forEach(([language, bytes]) => {
-            allLanguages[language] = (allLanguages[language] || 0) + (bytes as number);
-          });
-        });
-
+        const allLanguages = await apiService.getAllLanguagesForRepositories(repositories);
         setLanguages(allLanguages);
 
+        const frameworksResult = await apiService.getFrameworks();
+        if (frameworksResult.success && frameworksResult.data) {
+          setFrameworks(frameworksResult.data.frameworks);
+        }
+
         const sortedLanguages = Object.entries(allLanguages)
-          .sort(([, a], [, b]) => b - a)
+          .sort(([, a], [, b]) => (b as number) - (a as number))
           .slice(0, 10)
           .map(([language]) => language);
 
@@ -170,11 +142,21 @@ const TechStackComp: React.FC = () => {
           } as Partial<TechStack>);
         }
 
+        const currentFrameworks = techStack.frameworks;
+        const frameworks = githubData.frameworks.length > 0 ? githubData.frameworks : [];
+        const newFrameworks = frameworks.filter(framework => !currentFrameworks.includes(framework));
+        
+        if (newFrameworks.length > 0) {
+          updateTechStack({
+            frameworks: [...currentFrameworks, ...newFrameworks]
+          } as Partial<TechStack>);
+        }
+
         updateTechStack({
           contributions: repositories.length
         } as Partial<TechStack>);
 
-        showToast(`Fetched ${newLanguages.length} new languages from ${repositories.length} repositories!`, 'success');
+        showToast(`Fetched ${newLanguages.length} languages and ${newFrameworks.length} frameworks from ${repositories.length} repositories!`, 'success');
       }
     } catch (error) {
       console.error("Error fetching GitHub data:", error);
@@ -182,6 +164,64 @@ const TechStackComp: React.FC = () => {
       setError("Failed to fetch GitHub data");
     } finally {
       setIsLoadingGitHub(false);
+      setLoading(false);
+    }
+  };
+
+  const fetchFrameworksData = async () => {
+    if (!user) {
+      showToast("Please sign in to fetch GitHub data.", 'error');
+      return;
+    }
+
+    if (!isDataStale() && githubData.frameworks.length > 0) {
+      const currentFrameworks = techStack.frameworks;
+      const newFrameworks = githubData.frameworks.filter((framework: string) => !currentFrameworks.includes(framework));
+      
+      if (newFrameworks.length > 0) {
+        updateTechStack({
+          frameworks: [...currentFrameworks, ...newFrameworks]
+        } as Partial<TechStack>);
+      }
+
+      showToast(`Loaded ${newFrameworks.length} frameworks from GitHub!`, 'success');
+      return;
+    }
+
+    setIsLoadingFrameworks(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const frameworksResult = await apiService.getFrameworks();
+      
+      if (!frameworksResult.success) {
+        showToast(frameworksResult.error || "Failed to fetch frameworks", 'error');
+        setError(frameworksResult.error || "Failed to fetch frameworks");
+        return;
+      }
+
+      if (frameworksResult.data) {
+        const frameworks = frameworksResult.data.frameworks;
+        setFrameworks(frameworks);
+
+        const currentFrameworks = techStack.frameworks;
+        const newFrameworks = frameworks.filter((framework: string) => !currentFrameworks.includes(framework));
+        
+        if (newFrameworks.length > 0) {
+          updateTechStack({
+            frameworks: [...currentFrameworks, ...newFrameworks]
+          } as Partial<TechStack>);
+        }
+
+        showToast(`Fetched ${newFrameworks.length} frameworks from GitHub!`, 'success');
+      }
+    } catch (error) {
+      console.error("Error fetching frameworks:", error);
+      showToast("Failed to fetch frameworks. Please try again.", 'error');
+      setError("Failed to fetch frameworks");
+    } finally {
+      setIsLoadingFrameworks(false);
       setLoading(false);
     }
   };
@@ -201,13 +241,6 @@ const TechStackComp: React.FC = () => {
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Fetching...
-                </>
-              ) : !isDataStale() && githubData.repositories.length > 0 ? (
-                <>
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-                  </svg>
-                  Use Cached Data
                 </>
               ) : (
                 <>
@@ -269,7 +302,28 @@ const TechStackComp: React.FC = () => {
         </div>
 
         <div>
-          <h3 className="mb-3 text-lg font-medium">Frameworks & Libraries</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-medium">Frameworks & Libraries</h3>
+            <button
+              onClick={fetchFrameworksData}
+              disabled={isLoadingFrameworks || githubData.isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {(isLoadingFrameworks || githubData.isLoading) ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Fetching...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                  Fetch from GitHub
+                </>
+              )}
+            </button>
+          </div>
           <div className="mb-2">
             <div className="flex">
               <input
