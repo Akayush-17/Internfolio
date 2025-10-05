@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { githubService } from "@/lib/github";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,21 +22,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const headers = {
-      "Authorization": `Bearer ${githubToken}`,
-      "Accept": "application/vnd.github.v3+json",
-      "User-Agent": "Internfolio-App",
-    };
+    (githubService as any).accessToken = githubToken;
 
     const languagePromises = repositories.map(async (repo: { owner: string; name: string }) => {
       try {
-        const response = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}/languages`, { headers });
-        const languages = await response.json();
+        const languages = await githubService.getRepositoryLanguages(repo.owner, repo.name);
         return {
           repository: repo.name,
           languages
         };
       } catch (error) {
+        console.error(`Error fetching languages for ${repo.name}:`, error);
         return {
           repository: repo.name,
           languages: {}

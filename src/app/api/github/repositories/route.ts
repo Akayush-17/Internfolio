@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { githubService } from "@/lib/github";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,26 +13,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
-      headers: {
-        "Authorization": `Bearer ${githubToken}`,
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Internfolio-App",
-      },
-    });
+    (githubService as any).accessToken = githubToken;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json(
-        { 
-          error: "GitHub API error",
-          details: `${response.status} ${response.statusText}: ${errorText}`
-        },
-        { status: response.status }
-      );
-    }
-
-    const repositories = await response.json();
+    const repositories = await githubService.getUserRepositories();
+    
     const filteredRepos = repositories.filter((repo: any) => 
       !repo.fork && !repo.private
     );

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { githubService } from "@/lib/github";
 
 export async function GET(
   request: NextRequest,
@@ -24,18 +25,14 @@ export async function GET(
       );
     }
 
-    const headers = {
-      "Authorization": `Bearer ${githubToken}`,
-      "Accept": "application/vnd.github.v3+json",
-      "User-Agent": "Internfolio-App",
-    };
+    (githubService as any).accessToken = githubToken;
 
     const [repository, languages, pullRequests, commits, contributors] = await Promise.all([
-      fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers }).then(r => r.json()),
-      fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, { headers }).then(r => r.json()),
-      fetch(`https://api.github.com/repos/${owner}/${repo}/pulls?state=all&per_page=100`, { headers }).then(r => r.json()),
-      fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`, { headers }).then(r => r.json()),
-      fetch(`https://api.github.com/repos/${owner}/${repo}/stats/contributors`, { headers }).then(r => r.json())
+      githubService.getRepository(owner, repo),
+      githubService.getRepositoryLanguages(owner, repo),
+      githubService.getRepositoryPullRequests(owner, repo),
+      githubService.getRepositoryCommits(owner, repo),
+      githubService.getRepositoryContributors(owner, repo)
     ]);
 
     return NextResponse.json({
