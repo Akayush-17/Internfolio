@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    (githubService as any).accessToken = githubToken;
+    (githubService as unknown as { accessToken: string }).accessToken = githubToken;
 
     const languagePromises = repositories.map(async (repo: { owner: string; name: string }) => {
       try {

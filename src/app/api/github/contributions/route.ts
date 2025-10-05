@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { githubService } from "@/lib/github";
+import { GitHubContributor } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    (githubService as any).accessToken = githubToken;
+    (githubService as unknown as { accessToken: string }).accessToken = githubToken;
 
     const contributionPromises = repositories.map(async (repo: { owner: string; name: string }) => {
       try {
@@ -32,8 +33,8 @@ export async function POST(request: NextRequest) {
           githubService.getRepositoryContributors(repo.owner, repo.name)
         ]);
 
-        const totalLinesOfCode = contributors.reduce((total: number, contributor: any) => {
-          return total + contributor.weeks.reduce((weekTotal: number, week: any) => {
+        const totalLinesOfCode = contributors.reduce((total: number, contributor: GitHubContributor) => {
+          return total + contributor.weeks.reduce((weekTotal: number, week: { a: number; d: number }) => {
             return weekTotal + week.a + week.d;
           }, 0);
         }, 0);
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     if (username) {
       try {
-        await githubService.getUserContributions(username, startDate, endDate);
+        await githubService.getUserContributions(username, startDate);
       } catch (error) {
         console.error(`Error fetching user contributions for ${username}:`, error);
       }

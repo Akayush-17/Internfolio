@@ -229,7 +229,7 @@ export class GitHubService {
     return response.json();
   }
 
-  async getUserContributions(username: string, from?: string, to?: string) {
+  async getUserContributions(username: string, from?: string) {
     const headers = await this.getHeaders();
     let url = `${this.baseUrl}/users/${username}/events/public?per_page=100`;
     
@@ -250,7 +250,7 @@ export class GitHubService {
     try {
       const userId = await this.getCurrentUserId();
       if (userId) {
-        const contributionData = contributions.map((contribution: any) => ({
+        const contributionData = contributions.map((contribution: { type: string; repo?: { name: string }; created_at: string }) => ({
           user_id: userId,
           username,
           event_type: contribution.type,
@@ -278,7 +278,7 @@ export class GitHubService {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       return session?.user?.id || null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

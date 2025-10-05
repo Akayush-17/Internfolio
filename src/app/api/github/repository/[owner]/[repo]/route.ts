@@ -25,7 +25,7 @@ export async function GET(
       );
     }
 
-    (githubService as any).accessToken = githubToken;
+    (githubService as unknown as { accessToken: string }).accessToken = githubToken;
 
     const [repository, languages, pullRequests, commits, contributors] = await Promise.all([
       githubService.getRepository(owner, repo),
