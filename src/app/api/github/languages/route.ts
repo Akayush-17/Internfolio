@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     
     languageResults.forEach(result => {
       Object.entries(result.languages).forEach(([language, bytes]) => {
-        aggregatedLanguages[language] = (aggregatedLanguages[language] || 0) + bytes;
+        aggregatedLanguages[language] = (aggregatedLanguages[language] || 0) + (bytes as number);
       });
     });
 
