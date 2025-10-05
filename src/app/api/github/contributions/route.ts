@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { githubService } from "@/lib/github";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { repositories, startDate, endDate } = await request.json();
+    const { repositories, startDate, endDate, username } = await request.json();
 
     if (!repositories || !Array.isArray(repositories)) {
       return NextResponse.json(
@@ -21,23 +22,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const headers = {
-      "Authorization": `Bearer ${githubToken}`,
-      "Accept": "application/vnd.github.v3+json",
-      "User-Agent": "Internfolio-App",
-    };
+    (githubService as any).accessToken = githubToken;
 
     const contributionPromises = repositories.map(async (repo: { owner: string; name: string }) => {
       try {
-        let commitsUrl = `https://api.github.com/repos/${repo.owner}/${repo.name}/commits?per_page=100`;
-        if (startDate) {
-          commitsUrl += `&since=${startDate}`;
-        }
-
         const [commits, pullRequests, contributors] = await Promise.all([
-          fetch(commitsUrl, { headers }).then(r => r.json()),
-          fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}/pulls?state=all&per_page=100`, { headers }).then(r => r.json()),
-          fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}/stats/contributors`, { headers }).then(r => r.json())
+          githubService.getRepositoryCommits(repo.owner, repo.name, startDate),
+          githubService.getRepositoryPullRequests(repo.owner, repo.name),
+          githubService.getRepositoryContributors(repo.owner, repo.name)
         ]);
 
         const totalLinesOfCode = contributors.reduce((total: number, contributor: any) => {
@@ -57,6 +49,7 @@ export async function POST(request: NextRequest) {
           pullRequestsData: pullRequests
         };
       } catch (error) {
+        console.error(`Error fetching contributions for ${repo.name}:`, error);
         return {
           repository: repo.name,
           owner: repo.owner,
@@ -71,6 +64,14 @@ export async function POST(request: NextRequest) {
     });
 
     const contributionResults = await Promise.all(contributionPromises);
+
+    if (username) {
+      try {
+        await githubService.getUserContributions(username, startDate, endDate);
+      } catch (error) {
+        console.error(`Error fetching user contributions for ${username}:`, error);
+      }
+    }
 
     const totals = contributionResults.reduce((acc, result) => ({
       totalCommits: acc.totalCommits + result.commits,
