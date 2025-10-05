@@ -50,7 +50,42 @@ export class GitHubService {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    const repositories = await response.json();
+    
+    try {
+      const userId = await this.getCurrentUserId();
+      if (userId) {
+        const repositoryData = repositories.map((repo: GitHubRepository) => ({
+          user_id: userId,
+          github_repo_id: repo.id,
+          name: repo.name,
+          full_name: repo.full_name,
+          description: repo.description,
+          html_url: repo.html_url,
+          created_at: repo.created_at,
+          updated_at: repo.updated_at,
+          pushed_at: repo.pushed_at,
+          language: repo.language,
+          topics: repo.topics,
+          is_private: repo.private,
+          is_fork: repo.fork,
+          stargazers_count: repo.stargazers_count,
+          forks_count: repo.forks_count,
+          last_synced_at: new Date().toISOString()
+        }));
+
+        await supabase
+          .from('github_repositories')
+          .upsert(repositoryData, { 
+            onConflict: 'user_id,github_repo_id',
+            ignoreDuplicates: false 
+          });
+      }
+    } catch (error) {
+      console.error('Error saving repositories to database:', error);
+    }
+
+    return repositories;
   }
 
   async getRepository(owner: string, repo: string): Promise<GitHubRepository> {
@@ -76,7 +111,40 @@ export class GitHubService {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    const languages = await response.json();
+    
+    try {
+      const userId = await this.getCurrentUserId();
+      if (userId) {
+        const repoData = await supabase
+          .from('github_repositories')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('github_repo_id', (await this.getRepository(owner, repo)).id)
+          .single();
+
+        if (repoData.data) {
+          const languageData = Object.entries(languages).map(([language, bytes]) => ({
+            user_id: userId,
+            repository_id: repoData.data.id,
+            language,
+            bytes_count: bytes,
+            last_synced_at: new Date().toISOString()
+          }));
+
+          await supabase
+            .from('github_repository_languages')
+            .upsert(languageData, { 
+              onConflict: 'repository_id,language',
+              ignoreDuplicates: false 
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error saving repository languages to database:', error);
+    }
+
+    return languages;
   }
 
   async getRepositoryPullRequests(owner: string, repo: string): Promise<GitHubPullRequest[]> {
@@ -108,7 +176,44 @@ export class GitHubService {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    const commits = await response.json();
+    
+    try {
+      const userId = await this.getCurrentUserId();
+      if (userId) {
+        const repoData = await supabase
+          .from('github_repositories')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('github_repo_id', (await this.getRepository(owner, repo)).id)
+          .single();
+
+        if (repoData.data) {
+          const commitData = commits.map((commit: GitHubCommit) => ({
+            user_id: userId,
+            repository_id: repoData.data.id,
+            commit_sha: commit.sha,
+            message: commit.commit.message,
+            author_name: commit.commit.author.name,
+            author_username: commit.author.login,
+            commit_date: commit.commit.author.date,
+            html_url: commit.html_url,
+            last_synced_at: new Date().toISOString()
+          }));
+
+          await supabase
+            .from('github_commits')
+            .upsert(commitData, { 
+              onConflict: 'repository_id,commit_sha',
+              ignoreDuplicates: false 
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error saving commits to database:', error);
+    }
+
+    return commits;
   }
 
   async getRepositoryContributors(owner: string, repo: string): Promise<GitHubContributor[]> {
@@ -140,7 +245,42 @@ export class GitHubService {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    const contributions = await response.json();
+    
+    try {
+      const userId = await this.getCurrentUserId();
+      if (userId) {
+        const contributionData = contributions.map((contribution: any) => ({
+          user_id: userId,
+          username,
+          event_type: contribution.type,
+          repository_name: contribution.repo?.name || null,
+          created_at: contribution.created_at,
+          event_data: contribution,
+          last_synced_at: new Date().toISOString()
+        }));
+
+        await supabase
+          .from('github_contributions')
+          .upsert(contributionData, { 
+            onConflict: 'id',
+            ignoreDuplicates: false 
+          });
+      }
+    } catch (error) {
+      console.error('Error saving contributions to database:', error);
+    }
+
+    return contributions;
+  }
+
+  private async getCurrentUserId(): Promise<string | null> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.user?.id || null;
+    } catch (error) {
+      return null;
+    }
   }
 }
 
