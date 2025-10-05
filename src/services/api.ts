@@ -80,6 +80,27 @@ class ApiService {
     }
   }
 
+  async getTools() {
+    try {
+      const headers = await this.getAuthHeaders();
+      const response = await fetch("/api/github/tools", {
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tools: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching tools:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to fetch tools"
+      };
+    }
+  }
+
   async getRepositoryDetails(owner: string, repo: string) {
     try {
       const headers = await this.getAuthHeaders();

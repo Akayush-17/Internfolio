@@ -15,6 +15,7 @@ const TechStackComp: React.FC = () => {
     setRepositories, 
     setLanguages, 
     setFrameworks,
+    setTools,
     setLoading, 
     setError, 
     isDataStale 
@@ -25,6 +26,7 @@ const TechStackComp: React.FC = () => {
   const [toolInput, setToolInput] = useState("");
   const [isLoadingGitHub, setIsLoadingGitHub] = useState(false);
   const [isLoadingFrameworks, setIsLoadingFrameworks] = useState(false);
+  const [isLoadingTools, setIsLoadingTools] = useState(false);
 
   const handleAddTag = (field: keyof typeof techStack, value: string) => {
     if (!value.trim()) return;
@@ -95,11 +97,20 @@ const TechStackComp: React.FC = () => {
         } as Partial<TechStack>);
       }
 
+      const currentTools = techStack.tools;
+      const newTools = githubData.tools.filter(tool => !currentTools.includes(tool));
+      
+      if (newTools.length > 0) {
+        updateTechStack({
+          tools: [...currentTools, ...newTools]
+        } as Partial<TechStack>);
+      }
+
       updateTechStack({
         contributions: githubData.repositories.length
       } as Partial<TechStack>);
 
-      showToast(`Loaded ${newLanguages.length} languages and ${newFrameworks.length} frameworks from ${githubData.repositories.length} repositories!`, 'success');
+      showToast(`Loaded ${newLanguages.length} languages, ${newFrameworks.length} frameworks, and ${newTools.length} tools from ${githubData.repositories.length} repositories!`, 'success');
       return;
     }
 
@@ -128,6 +139,11 @@ const TechStackComp: React.FC = () => {
           setFrameworks(frameworksResult.data.frameworks);
         }
 
+        const toolsResult = await apiService.getTools();
+        if (toolsResult.success && toolsResult.data) {
+          setTools(toolsResult.data.tools);
+        }
+
         const sortedLanguages = Object.entries(allLanguages)
           .sort(([, a], [, b]) => (b as number) - (a as number))
           .slice(0, 10)
@@ -143,7 +159,7 @@ const TechStackComp: React.FC = () => {
         }
 
         const currentFrameworks = techStack.frameworks;
-        const frameworks = githubData.frameworks.length > 0 ? githubData.frameworks : [];
+        const frameworks = githubData.frameworks && githubData.frameworks.length > 0 ? githubData.frameworks : [];
         const newFrameworks = frameworks.filter(framework => !currentFrameworks.includes(framework));
         
         if (newFrameworks.length > 0) {
@@ -152,11 +168,21 @@ const TechStackComp: React.FC = () => {
           } as Partial<TechStack>);
         }
 
+        const currentTools = techStack.tools;
+        const tools = githubData.tools && githubData.tools.length > 0 ? githubData.tools : [];
+        const newTools = tools.filter(tool => !currentTools.includes(tool));
+        
+        if (newTools.length > 0) {
+          updateTechStack({
+            tools: [...currentTools, ...newTools]
+          } as Partial<TechStack>);
+        }
+
         updateTechStack({
           contributions: repositories.length
         } as Partial<TechStack>);
 
-        showToast(`Fetched ${newLanguages.length} languages and ${newFrameworks.length} frameworks from ${repositories.length} repositories!`, 'success');
+        showToast(`Fetched ${newLanguages.length} languages, ${newFrameworks.length} frameworks, and ${newTools.length} tools from ${repositories.length} repositories!`, 'success');
       }
     } catch (error) {
       console.error("Error fetching GitHub data:", error);
@@ -174,7 +200,7 @@ const TechStackComp: React.FC = () => {
       return;
     }
 
-    if (!isDataStale() && githubData.frameworks.length > 0) {
+    if (!isDataStale() && githubData.frameworks && githubData.frameworks.length > 0) {
       const currentFrameworks = techStack.frameworks;
       const newFrameworks = githubData.frameworks.filter((framework: string) => !currentFrameworks.includes(framework));
       
@@ -222,6 +248,64 @@ const TechStackComp: React.FC = () => {
       setError("Failed to fetch frameworks");
     } finally {
       setIsLoadingFrameworks(false);
+      setLoading(false);
+    }
+  };
+
+  const fetchToolsData = async () => {
+    if (!user) {
+      showToast("Please sign in to fetch GitHub data.", 'error');
+      return;
+    }
+
+    if (!isDataStale() && githubData.tools && githubData.tools.length > 0) {
+      const currentTools = techStack.tools;
+      const newTools = githubData.tools.filter((tool: string) => !currentTools.includes(tool));
+      
+      if (newTools.length > 0) {
+        updateTechStack({
+          tools: [...currentTools, ...newTools]
+        } as Partial<TechStack>);
+      }
+
+      showToast(`Loaded ${newTools.length} tools from GitHub!`, 'success');
+      return;
+    }
+
+    setIsLoadingTools(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const toolsResult = await apiService.getTools();
+      
+      if (!toolsResult.success) {
+        showToast(toolsResult.error || "Failed to fetch tools", 'error');
+        setError(toolsResult.error || "Failed to fetch tools");
+        return;
+      }
+
+      if (toolsResult.data) {
+        const tools = toolsResult.data.tools;
+        setTools(tools);
+
+        const currentTools = techStack.tools;
+        const newTools = tools.filter((tool: string) => !currentTools.includes(tool));
+        
+        if (newTools.length > 0) {
+          updateTechStack({
+            tools: [...currentTools, ...newTools]
+          } as Partial<TechStack>);
+        }
+
+        showToast(`Fetched ${newTools.length} tools from GitHub!`, 'success');
+      }
+    } catch (error) {
+      console.error("Error fetching tools:", error);
+      showToast("Failed to fetch tools. Please try again.", 'error');
+      setError("Failed to fetch tools");
+    } finally {
+      setIsLoadingTools(false);
       setLoading(false);
     }
   };
@@ -416,6 +500,26 @@ const TechStackComp: React.FC = () => {
                 </div>
               ))}
             </div>
+            <button
+              onClick={fetchToolsData}
+              disabled={isLoadingTools}
+              className="mt-3 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:shadow-md transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>
+                {isLoadingTools ? "Loading..." : "Fetch from GitHub"}
+              </span>
+            </button>
           </div>
         </div>
 
