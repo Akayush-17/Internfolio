@@ -1,17 +1,29 @@
 import React, { useState } from "react";
 import useFormStore from "@/store/useFormStore";
 import { TechStack } from "@/types";
+import useAuthStore from "@/store/auth";
+import { supabase } from "@/store/auth";
+import { showToast } from "@/components/ui/toast";
+import { useGitHubStore } from "@/store/githubStore";
 
 const TechStackComp: React.FC = () => {
   const { formData, updateTechStack } = useFormStore();
   const { techStack } = formData;
+  const { user } = useAuthStore();
+  const { 
+    data: githubData, 
+    setRepositories, 
+    setLanguages, 
+    setLoading, 
+    setError, 
+    isDataStale 
+  } = useGitHubStore();
 
-  // State for tag input fields
   const [languageInput, setLanguageInput] = useState("");
   const [frameworkInput, setFrameworkInput] = useState("");
   const [toolInput, setToolInput] = useState("");
+  const [isLoadingGitHub, setIsLoadingGitHub] = useState(false);
 
-  // Handle adding a new tag
   const handleAddTag = (field: keyof typeof techStack, value: string) => {
     if (!value.trim()) return;
 
@@ -24,7 +36,6 @@ const TechStackComp: React.FC = () => {
     }
   };
 
-  // Handle removing a tag
   const handleRemoveTag = (field: keyof typeof techStack, value: string) => {
     const currentValues = techStack[field] as string[];
     updateTechStack({
@@ -32,7 +43,6 @@ const TechStackComp: React.FC = () => {
     } as Partial<TechStack>);
   };
 
-  // Handle key press in tag inputs
   const handleKeyPress = (
     e: React.KeyboardEvent,
     field: keyof typeof techStack,
@@ -46,7 +56,6 @@ const TechStackComp: React.FC = () => {
     }
   };
 
-  // Handle changes for new fields
   const handleFieldChange = (
     field: keyof typeof techStack,
     value: string | number
@@ -54,11 +63,162 @@ const TechStackComp: React.FC = () => {
     updateTechStack({ [field]: value } as Partial<TechStack>);
   };
 
+  const fetchGitHubData = async () => {
+    if (!user) {
+      showToast("Please sign in to fetch GitHub data.", 'error');
+      return;
+    }
+
+    if (!isDataStale() && githubData.repositories.length > 0) {
+      const sortedLanguages = Object.entries(githubData.languages)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([language]) => language);
+
+      const currentLanguages = techStack.languages;
+      const newLanguages = sortedLanguages.filter(lang => !currentLanguages.includes(lang));
+      
+      if (newLanguages.length > 0) {
+        updateTechStack({
+          languages: [...currentLanguages, ...newLanguages]
+        } as Partial<TechStack>);
+      }
+
+      updateTechStack({
+        contributions: githubData.repositories.length
+      } as Partial<TechStack>);
+
+      showToast(`Loaded ${newLanguages.length} new languages from ${githubData.repositories.length} cached repositories!`, 'success');
+      return;
+    }
+
+    setIsLoadingGitHub(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.provider_token) {
+        showToast("GitHub token not found. Please sign in with GitHub (not Google) to use this feature.", 'error');
+        setError("GitHub token not found");
+        return;
+      }
+
+      const response = await fetch("/api/github/repositories", {
+        headers: {
+          "Authorization": `Bearer ${session.provider_token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch repositories");
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.data.length > 0) {
+        const repositories = data.data;
+        setRepositories(repositories);
+
+        const languagePromises = repositories.map(async (repo: any) => {
+          try {
+            const langResponse = await fetch("/api/github/languages", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${session.provider_token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                repositories: [{ owner: repo.owner.login, name: repo.name }]
+              }),
+            });
+            
+            if (langResponse.ok) {
+              const langData = await langResponse.json();
+              return langData.data?.languages || {};
+            }
+            return {};
+          } catch (error) {
+            return {};
+          }
+        });
+
+        const languageResults = await Promise.all(languagePromises);
+        const allLanguages: { [key: string]: number } = {};
+        
+        languageResults.forEach(languages => {
+          Object.entries(languages).forEach(([language, bytes]) => {
+            allLanguages[language] = (allLanguages[language] || 0) + (bytes as number);
+          });
+        });
+
+        setLanguages(allLanguages);
+
+        const sortedLanguages = Object.entries(allLanguages)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 10)
+          .map(([language]) => language);
+
+        const currentLanguages = techStack.languages;
+        const newLanguages = sortedLanguages.filter(lang => !currentLanguages.includes(lang));
+        
+        if (newLanguages.length > 0) {
+          updateTechStack({
+            languages: [...currentLanguages, ...newLanguages]
+          } as Partial<TechStack>);
+        }
+
+        updateTechStack({
+          contributions: repositories.length
+        } as Partial<TechStack>);
+
+        showToast(`Fetched ${newLanguages.length} new languages from ${repositories.length} repositories!`, 'success');
+      }
+    } catch (error) {
+      console.error("Error fetching GitHub data:", error);
+      showToast("Failed to fetch GitHub data. Please try again.", 'error');
+      setError("Failed to fetch GitHub data");
+    } finally {
+      setIsLoadingGitHub(false);
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       <div className="space-y-6">
         <div>
-          <h3 className="mb-3 text-lg font-medium">Programming Languages</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-medium">Programming Languages</h3>
+            <button
+              onClick={fetchGitHubData}
+              disabled={isLoadingGitHub || githubData.isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {(isLoadingGitHub || githubData.isLoading) ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Fetching...
+                </>
+              ) : !isDataStale() && githubData.repositories.length > 0 ? (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                  Use Cached Data
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                  Fetch from GitHub
+                </>
+              )}
+            </button>
+          </div>
           <div className="mb-2">
             <div className="flex">
               <input

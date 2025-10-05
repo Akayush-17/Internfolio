@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { githubService } from "@/lib/github";
+import { supabase } from "@/store/auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { owner: string; repo: string } }
 ) {
   try {
+    let githubToken = null;
+    
     const authHeader = request.headers.get('authorization');
-    const githubToken = authHeader?.replace('Bearer ', '');
+    
+    if (authHeader) {
+      githubToken = authHeader.replace('Bearer ', '');
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      githubToken = session?.provider_token;
+    }
 
     if (!githubToken) {
       return NextResponse.json(
-        { error: "GitHub token required in Authorization header" },
+        { error: "GitHub token required. Please sign in with GitHub or provide token in Authorization header" },
         { status: 401 }
       );
     }
@@ -25,7 +34,7 @@ export async function GET(
       );
     }
 
-    (githubService as unknown as { accessToken: string }).accessToken = githubToken;
+    (githubService as any).accessToken = githubToken;
 
     const [repository, languages, pullRequests, commits, contributors] = await Promise.all([
       githubService.getRepository(owner, repo),

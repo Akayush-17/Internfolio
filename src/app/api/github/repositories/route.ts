@@ -1,38 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GitHubRepository } from "@/types";
+import { githubService } from "@/lib/github";
+import { supabase } from "@/store/auth";
 
 export async function GET(request: NextRequest) {
   try {
+    let githubToken = null;
+    
     const authHeader = request.headers.get('authorization');
-    const githubToken = authHeader?.replace('Bearer ', '');
+    
+    if (authHeader) {
+      githubToken = authHeader.replace('Bearer ', '');
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      githubToken = session?.provider_token;
+    }
 
     if (!githubToken) {
       return NextResponse.json(
-        { error: "GitHub token required in Authorization header" },
+        { error: "GitHub token required. Please sign in with GitHub or provide token in Authorization header" },
         { status: 401 }
       );
     }
 
-    const response = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
-      headers: {
-        "Authorization": `Bearer ${githubToken}`,
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Internfolio-App",
-      },
-    });
+    (githubService as any).accessToken = githubToken;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json(
-        { 
-          error: "GitHub API error",
-          details: `${response.status} ${response.statusText}: ${errorText}`
-        },
-        { status: response.status }
-      );
-    }
-
-    const repositories = await response.json() as GitHubRepository[];
+    const repositories = await githubService.getUserRepositories();
+    
     const filteredRepos = repositories.filter((repo: GitHubRepository) => 
       !repo.fork && !repo.private
     );
