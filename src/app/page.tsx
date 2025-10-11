@@ -10,19 +10,21 @@ import useAuthStore from "@/store/auth";
 
 export default function LandingPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  const { isAuthenticated, isLoading, checkAuth, authProvider } = useAuthStore();
 
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const isOAuthAuthenticated = isAuthenticated && (authProvider === 'google' || authProvider === 'github');
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!isLoading && isOAuthAuthenticated) {
       router.push("/form");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isOAuthAuthenticated, router]);
 
   const handleStartReport = () => {
     if (!isAuthenticated) {
@@ -34,8 +36,7 @@ export default function LandingPage() {
     setShowAuthModal(false);
   };
 
-  // Show loading while checking auth or if authenticated (to prevent flash before redirect)
-  if (isLoading || isAuthenticated) {
+  if (isLoading || isOAuthAuthenticated) {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-slate-900 text-white">
         <div className="text-xl">Loading...</div>

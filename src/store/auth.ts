@@ -14,6 +14,8 @@ type User = {
     avatar_url?: string;
     full_name?: string;
     name?: string;
+    user_name?: string;
+    preferred_username?: string;
   };
 };
 
@@ -23,6 +25,7 @@ type AuthState = {
   error: string | null;
   isAuthenticated: boolean;
   portfolioId: string | null;
+  authProvider: string | null;
 
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
@@ -39,6 +42,7 @@ const useAuthStore = create<AuthState>()(
       error: null,
       isAuthenticated: false,
       portfolioId: null,
+      authProvider: null,
 
       checkAuth: async () => {
         try {
@@ -48,7 +52,8 @@ const useAuthStore = create<AuthState>()(
           } = await supabase.auth.getSession();
 
           if (session?.user) {
-            // Check if user has a portfolio ID
+            const provider = session.user.app_metadata?.provider || null;
+            
             const { data } = await supabase
               .from("user_portfolios")
               .select("portfolio_id")
@@ -60,12 +65,14 @@ const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               isLoading: false,
               portfolioId: data?.portfolio_id || null,
+              authProvider: provider,
             });
           } else {
             set({
               user: null,
               isAuthenticated: false,
               isLoading: false,
+              authProvider: null,
             });
           }
         } catch (error: unknown) {
@@ -75,6 +82,7 @@ const useAuthStore = create<AuthState>()(
             error: "Failed to check authentication status",
             isLoading: false,
             isAuthenticated: false,
+            authProvider: null,
           });
         }
       },
@@ -134,6 +142,7 @@ const useAuthStore = create<AuthState>()(
             user: null,
             isAuthenticated: false,
             isLoading: false,
+            authProvider: null,
           });
         } catch (error: unknown) {
           const err = error as Error;
@@ -186,6 +195,7 @@ const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         portfolioId: state.portfolioId,
+        authProvider: state.authProvider,
       }),
     }
   )
