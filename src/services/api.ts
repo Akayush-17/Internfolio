@@ -1,12 +1,12 @@
 import { supabase } from "@/store/auth";
 
 class ApiService {
-  private async getAuthHeaders() {
+  private async getAuthHeaders(): Promise<{ "Authorization": string; "Content-Type": string } | null> {
     const { data: { session } } = await supabase.auth.getSession();
     const githubToken = session?.provider_token;
     
     if (!githubToken) {
-      throw new Error("GitHub token not found. Please sign in with GitHub.");
+      return null;
     }
 
     return {
@@ -18,6 +18,12 @@ class ApiService {
   async getRepositories() {
     try {
       const headers = await this.getAuthHeaders();
+      if (!headers) {
+        return {
+          success: false,
+          error: "GitHub token not found. Please sign in with GitHub."
+        };
+      }
       const response = await fetch("/api/github/repositories", {
         headers,
       });
@@ -39,6 +45,12 @@ class ApiService {
   async getLanguages(repositories: Array<{ owner: string; name: string }>) {
     try {
       const headers = await this.getAuthHeaders();
+      if (!headers) {
+        return {
+          success: false,
+          error: "GitHub token not found. Please sign in with GitHub."
+        };
+      }
       const response = await fetch("/api/github/languages", {
         method: "POST",
         headers,
@@ -62,6 +74,12 @@ class ApiService {
   async getFrameworks() {
     try {
       const headers = await this.getAuthHeaders();
+      if (!headers) {
+        return {
+          success: false,
+          error: "GitHub token not found. Please sign in with GitHub."
+        };
+      }
       const response = await fetch("/api/github/frameworks", {
         headers,
       });
@@ -83,6 +101,12 @@ class ApiService {
   async getTools() {
     try {
       const headers = await this.getAuthHeaders();
+      if (!headers) {
+        return {
+          success: false,
+          error: "GitHub token not found. Please sign in with GitHub."
+        };
+      }
       const response = await fetch("/api/github/tools", {
         headers,
       });
@@ -104,6 +128,12 @@ class ApiService {
   async getRepositoryDetails(owner: string, repo: string) {
     try {
       const headers = await this.getAuthHeaders();
+      if (!headers) {
+        return {
+          success: false,
+          error: "GitHub token not found. Please sign in with GitHub."
+        };
+      }
       const response = await fetch(`/api/github/repository/${owner}/${repo}`, {
         headers,
       });
@@ -125,6 +155,12 @@ class ApiService {
   async getContributions(repositories?: Array<{ owner: string; name: string }>, startDate?: string, endDate?: string, username?: string) {
     try {
       const headers = await this.getAuthHeaders();
+      if (!headers) {
+        return {
+          success: false,
+          error: "GitHub token not found. Please sign in with GitHub."
+        };
+      }
       const response = await fetch("/api/github/contributions", {
         method: "POST",
         headers,
@@ -137,7 +173,12 @@ class ApiService {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch contributions: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Failed to fetch contributions: ${response.status}`;
+        return {
+          success: false,
+          error: errorMessage
+        };
       }
 
       return await response.json();
@@ -145,7 +186,7 @@ class ApiService {
       console.error("Error fetching contributions:", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch contributions"
+        error: error instanceof Error ? error.message : "Failed to fetch contributions. Please check your network connection."
       };
     }
   }
@@ -180,6 +221,12 @@ class ApiService {
   async getCurrentGitHubUser() {
     try {
       const headers = await this.getAuthHeaders();
+      if (!headers) {
+        return {
+          success: false,
+          error: "GitHub token not found. Please sign in with GitHub."
+        };
+      }
       const response = await fetch("https://api.github.com/user", {
         headers: {
           ...headers,
