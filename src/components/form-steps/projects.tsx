@@ -1,15 +1,28 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import useFormStore from "@/store/useFormStore";
-import { Project, PullRequest, Tickets, Docs } from "@/types";
+import { Project, PullRequest, Tickets, Docs, GitHubRepository } from "@/types";
 import ProjectList from "@/components/form-steps/project-list";
 import ProjectForm from "@/components/form-steps/project-form";
 import ProjectModals from "@/components/form-steps/project-modal";
+import GitHubImportButton from "@/components/form-steps/github-import-button";
+import GitHubRepositoryModal from "@/components/form-steps/github-repository-modal";
 import useAuthStore from "@/store/auth";
+import { useGitHubStore } from "@/store/githubStore";
+import { apiService } from "@/services/api";
+import { showToast } from "@/components/ui/toast";
 
 const Projects: React.FC = () => {
   const { formData, addProject, removeProject, addPR, removePR } =
     useFormStore();
   const { projects } = formData;
+  const { user } = useAuthStore();
+  const { 
+    data: githubData, 
+    setRepositories, 
+    setLoading, 
+    setError, 
+    isDataStale 
+  } = useGitHubStore();
 
   const [newProject, setNewProject] = useState<Project>({
     title: "",
@@ -90,6 +103,11 @@ const Projects: React.FC = () => {
     tags: "",
     link: "",
   });
+
+  const [showGitHubModal, setShowGitHubModal] = useState(false);
+  const [isLoadingGitHub, setIsLoadingGitHub] = useState(false);
+  const [isLoadingRepoDetails, setIsLoadingRepoDetails] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Modal handlers
   const openPRModal = (projectIndex: number) => {
@@ -399,6 +417,106 @@ const Projects: React.FC = () => {
     });
   };
 
+  const fetchGitHubRepositories = useCallback(async () => {
+    if (!user) {
+      showToast("Please sign in to fetch GitHub data.", 'error');
+      return;
+    }
+
+    if (!isDataStale() && githubData.repositories.length > 0) {
+      setShowGitHubModal(true);
+      return;
+    }
+
+    setIsLoadingGitHub(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const repositoriesResult = await apiService.getRepositories();
+      
+      if (!repositoriesResult.success) {
+        showToast(repositoriesResult.error || "Failed to fetch repositories", 'error');
+        setError(repositoriesResult.error || "Failed to fetch repositories");
+        return;
+      }
+
+      if (repositoriesResult.data && repositoriesResult.data.length > 0) {
+        setRepositories(repositoriesResult.data);
+        setShowGitHubModal(true);
+        showToast(`Fetched ${repositoriesResult.data.length} repositories!`, 'success');
+      } else {
+        showToast("No repositories found.", 'info');
+      }
+    } catch (error) {
+      console.error("Error fetching GitHub repositories:", error);
+      showToast("Failed to fetch GitHub repositories. Please try again.", 'error');
+      setError("Failed to fetch GitHub repositories");
+    } finally {
+      setIsLoadingGitHub(false);
+      setLoading(false);
+    }
+  }, [user, isDataStale, githubData, setRepositories, setLoading, setError]);
+
+  const handleSelectRepository = useCallback(async (repo: GitHubRepository) => {
+    setIsLoadingRepoDetails(true);
+    
+    try {
+      const owner = repo.full_name.split('/')[0];
+      const repoName = repo.name;
+
+      const repoDetailsResult = await apiService.getRepositoryDetails(owner, repoName);
+      
+      if (!repoDetailsResult.success) {
+        showToast("Failed to fetch repository details", 'error');
+        return;
+      }
+
+      const details = repoDetailsResult.data;
+      
+      const languages = details.languages ? Object.keys(details.languages) : [];
+      
+      const pullRequests: PullRequest[] = details.pullRequests?.slice(0, 5).map((pr: any) => ({
+        title: pr.title,
+        description: pr.body || "",
+        link: pr.html_url,
+        status: pr.merged_at ? "Merged" : pr.state === "open" ? "Open" : "Closed",
+        date: pr.created_at,
+      })) || [];
+
+      setNewProject({
+        title: repo.name,
+        description: repo.description || `GitHub repository: ${repo.name}`,
+        role: "",
+        technologies: languages,
+        outcome: "",
+        timelineStart: repo.created_at ? new Date(repo.created_at).toISOString().split('T')[0] : "",
+        timelineEnd: repo.updated_at ? new Date(repo.updated_at).toISOString().split('T')[0] : "",
+        link: repo.html_url,
+        pullRequests: pullRequests,
+        media: [],
+        challenges: [],
+        tickets: [],
+        docs: [],
+      });
+
+      setShowGitHubModal(false);
+      showToast(`Project details loaded from ${repo.name}!`, 'success');
+      
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    } catch (error) {
+      console.error("Error fetching repository details:", error);
+      showToast("Failed to fetch repository details. Please try again.", 'error');
+    } finally {
+      setIsLoadingRepoDetails(false);
+    }
+  }, []);
+
+  const filteredRepositories = githubData.repositories.filter((repo: GitHubRepository) => 
+    repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (repo.description && repo.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
     <div>
       {/* List of existing projects */}
@@ -415,6 +533,24 @@ const Projects: React.FC = () => {
         openJiraModal={openJiraModal}
         removeDocs={removeDocs}
         openDocsModal={openDocsModal}
+      />
+
+      {/* GitHub Integration Button */}
+      <GitHubImportButton
+        onClick={fetchGitHubRepositories}
+        isLoading={isLoadingGitHub || githubData.isLoading}
+        disabled={isLoadingGitHub || githubData.isLoading}
+      />
+
+      {/* GitHub Repository Modal */}
+      <GitHubRepositoryModal
+        isOpen={showGitHubModal}
+        onClose={() => setShowGitHubModal(false)}
+        repositories={filteredRepositories}
+        onSelectRepository={handleSelectRepository}
+        isLoading={isLoadingRepoDetails}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
 
       {/* Add new project form */}
