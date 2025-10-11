@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import useFormStore from "@/store/useFormStore";
 import { TechStack } from "@/types";
 import useAuthStore from "@/store/auth";
@@ -27,8 +27,9 @@ const TechStackComp: React.FC = () => {
   const [isLoadingGitHub, setIsLoadingGitHub] = useState(false);
   const [isLoadingFrameworks, setIsLoadingFrameworks] = useState(false);
   const [isLoadingTools, setIsLoadingTools] = useState(false);
+  const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
 
-  const handleAddTag = (field: keyof typeof techStack, value: string) => {
+  const handleAddTag = useCallback((field: keyof typeof techStack, value: string) => {
     if (!value.trim()) return;
 
     const normalizedValue = value.trim();
@@ -38,16 +39,16 @@ const TechStackComp: React.FC = () => {
         [field]: [...currentValues, normalizedValue],
       } as Partial<TechStack>);
     }
-  };
+  }, [techStack, updateTechStack]);
 
-  const handleRemoveTag = (field: keyof typeof techStack, value: string) => {
+  const handleRemoveTag = useCallback((field: keyof typeof techStack, value: string) => {
     const currentValues = techStack[field] as string[];
     updateTechStack({
       [field]: currentValues.filter((item) => item !== value),
     } as Partial<TechStack>);
-  };
+  }, [techStack, updateTechStack]);
 
-  const handleKeyPress = (
+  const handleKeyPress = useCallback((
     e: React.KeyboardEvent,
     field: keyof typeof techStack,
     value: string,
@@ -58,16 +59,16 @@ const TechStackComp: React.FC = () => {
       handleAddTag(field, value);
       setInput("");
     }
-  };
+  }, [handleAddTag]);
 
-  const handleFieldChange = (
+  const handleFieldChange = useCallback((
     field: keyof typeof techStack,
     value: string | number
   ) => {
     updateTechStack({ [field]: value } as Partial<TechStack>);
-  };
+  }, [updateTechStack]);
 
-  const fetchGitHubData = async () => {
+  const fetchGitHubData = useCallback(async () => {
     if (!user) {
       showToast("Please sign in to fetch GitHub data.", 'error');
       return;
@@ -192,9 +193,9 @@ const TechStackComp: React.FC = () => {
       setIsLoadingGitHub(false);
       setLoading(false);
     }
-  };
+  }, [user, isDataStale, githubData, techStack, updateTechStack, setRepositories, setLanguages, setFrameworks, setTools, setLoading, setError]);
 
-  const fetchFrameworksData = async () => {
+  const fetchFrameworksData = useCallback(async () => {
     if (!user) {
       showToast("Please sign in to fetch GitHub data.", 'error');
       return;
@@ -250,9 +251,9 @@ const TechStackComp: React.FC = () => {
       setIsLoadingFrameworks(false);
       setLoading(false);
     }
-  };
+  }, [user, isDataStale, githubData, techStack, updateTechStack, setFrameworks, setLoading, setError]);
 
-  const fetchToolsData = async () => {
+  const fetchToolsData = useCallback(async () => {
     if (!user) {
       showToast("Please sign in to fetch GitHub data.", 'error');
       return;
@@ -308,7 +309,74 @@ const TechStackComp: React.FC = () => {
       setIsLoadingTools(false);
       setLoading(false);
     }
-  };
+  }, [user, isDataStale, githubData, techStack, updateTechStack, setTools, setLoading, setError]);
+
+  const fetchAdditionalInfoData = useCallback(async () => {
+    if (!user) {
+      showToast("Please sign in to fetch GitHub data.", 'error');
+      return;
+    }
+
+    if (!githubData.repositories || githubData.repositories.length === 0) {
+      showToast("Please fetch repositories first by clicking 'Fetch from GitHub' in Programming Languages section.", 'info');
+      return;
+    }
+
+    setIsLoadingAdditionalInfo(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const githubUserResult = await apiService.getCurrentGitHubUser();
+      
+      if (!githubUserResult.success || !githubUserResult.data?.login) {
+        showToast("Failed to fetch GitHub username", 'error');
+        setError("Failed to fetch GitHub username");
+        return;
+      }
+
+      const username = githubUserResult.data.login;
+
+      const repositories = githubData.repositories.map(repo => ({
+        owner: repo.full_name.split('/')[0],
+        name: repo.name
+      }));
+
+      const startDate = formData.basicInfo?.startDate;
+      const endDate = formData.basicInfo?.endDate;
+
+      const contributionsResult = await apiService.getContributions(
+        repositories,
+        startDate,
+        endDate,
+        username
+      );
+      
+      if (!contributionsResult.success) {
+        showToast(contributionsResult.error || "Failed to fetch contributions data", 'error');
+        setError(contributionsResult.error || "Failed to fetch contributions data");
+        return;
+      }
+
+      if (contributionsResult.data && contributionsResult.data.totals) {
+        const { totalCommits, totalLinesOfCode } = contributionsResult.data.totals;
+
+        updateTechStack({
+          commits: totalCommits.toString(),
+          linesOfCode: totalLinesOfCode
+        } as Partial<TechStack>);
+
+        showToast(`Fetched ${totalCommits} commits and ${totalLinesOfCode} lines of code from GitHub!`, 'success');
+      }
+    } catch (error) {
+      console.error("Error fetching additional info:", error);
+      showToast("Failed to fetch additional information. Please try again.", 'error');
+      setError("Failed to fetch additional information");
+    } finally {
+      setIsLoadingAdditionalInfo(false);
+      setLoading(false);
+    }
+  }, [user, githubData, formData, updateTechStack, setLoading, setError]);
 
   return (
     <div>
@@ -524,7 +592,28 @@ const TechStackComp: React.FC = () => {
         </div>
 
         <div>
-          <h3 className="mb-3 text-lg font-medium">Additional Information</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-medium">Additional Information</h3>
+            <button
+              onClick={fetchAdditionalInfoData}
+              disabled={isLoadingAdditionalInfo || githubData.isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {(isLoadingAdditionalInfo || githubData.isLoading) ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Fetching...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                  Fetch from GitHub
+                </>
+              )}
+            </button>
+          </div>
           <div className="flex flex-col space-y-4">
             <div className="flex space-x-4">
               <div className="flex-1">

@@ -122,11 +122,18 @@ class ApiService {
     }
   }
 
-  async getContributions() {
+  async getContributions(repositories?: Array<{ owner: string; name: string }>, startDate?: string, endDate?: string, username?: string) {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetch("/api/github/contributions", {
+        method: "POST",
         headers,
+        body: JSON.stringify({ 
+          repositories: repositories || [],
+          startDate,
+          endDate,
+          username
+        }),
       });
 
       if (!response.ok) {
@@ -167,6 +174,39 @@ class ApiService {
     } catch (error) {
       console.error("Error fetching all languages:", error);
       return {};
+    }
+  }
+
+  async getCurrentGitHubUser() {
+    try {
+      const headers = await this.getAuthHeaders();
+      const response = await fetch("https://api.github.com/user", {
+        headers: {
+          ...headers,
+          "Accept": "application/vnd.github.v3+json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch GitHub user: ${response.status}`);
+      }
+
+      const userData = await response.json();
+      return {
+        success: true,
+        data: {
+          login: userData.login,
+          name: userData.name,
+          email: userData.email,
+          avatar_url: userData.avatar_url,
+        }
+      };
+    } catch (error) {
+      console.error("Error fetching GitHub user:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to fetch GitHub user"
+      };
     }
   }
 }
