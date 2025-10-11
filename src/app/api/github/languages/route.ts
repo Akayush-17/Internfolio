@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    (githubService as any).accessToken = githubToken;
+    githubService.setAccessToken(githubToken);
 
     const languagePromises = repositories.map(async (repo: { owner: string; name: string }) => {
       try {

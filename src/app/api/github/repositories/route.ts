@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    (githubService as any).accessToken = githubToken;
+    githubService.setAccessToken(githubToken);
 
     const repositories = await githubService.getUserRepositories();
     

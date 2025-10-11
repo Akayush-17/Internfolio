@@ -1,5 +1,3 @@
-import React from 'react';
-
 export type ToastType = 'success' | 'error' | 'info';
 
 export const showToast = (message: string, type: ToastType = 'info') => {

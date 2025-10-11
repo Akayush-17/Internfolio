@@ -4,7 +4,7 @@ import { supabase } from "@/store/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { owner: string; repo: string } }
+  { params }: { params: Promise<{ owner: string; repo: string }> }
 ) {
   try {
     let githubToken = null;
@@ -25,7 +25,7 @@ export async function GET(
       );
     }
 
-    const { owner, repo } = params;
+    const { owner, repo } = await params;
 
     if (!owner || !repo) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function GET(
       );
     }
 
-    (githubService as any).accessToken = githubToken;
+    githubService.setAccessToken(githubToken);
 
     const [repository, languages, pullRequests, commits, contributors] = await Promise.all([
       githubService.getRepository(owner, repo),

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     
     const toolsAndPlatforms = new Set<string>();
     
-    repositories.forEach((repo: any) => {
+    repositories.forEach((repo: { name?: string; description?: string; topics?: string[] }) => {
       if (repo.topics && Array.isArray(repo.topics)) {
         repo.topics.forEach((topic: string) => {
           if (topic && topic.trim()) {
