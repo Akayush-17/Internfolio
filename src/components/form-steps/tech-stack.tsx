@@ -5,11 +5,12 @@ import useAuthStore from "@/store/auth";
 import { showToast } from "@/components/ui/toast";
 import { useGitHubStore } from "@/store/githubStore";
 import { apiService } from "@/services/api";
+import GitHubLoginModal from "./github-login-modal";
 
 const TechStackComp: React.FC = () => {
   const { formData, updateTechStack } = useFormStore();
   const { techStack } = formData;
-  const { user } = useAuthStore();
+  const { user, signInWithGithub } = useAuthStore();
   const { 
     data: githubData, 
     setRepositories, 
@@ -28,6 +29,7 @@ const TechStackComp: React.FC = () => {
   const [isLoadingFrameworks, setIsLoadingFrameworks] = useState(false);
   const [isLoadingTools, setIsLoadingTools] = useState(false);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
+  const [showGitHubLoginModal, setShowGitHubLoginModal] = useState(false);
 
   const handleAddTag = useCallback((field: keyof typeof techStack, value: string) => {
     if (!value.trim()) return;
@@ -67,6 +69,23 @@ const TechStackComp: React.FC = () => {
   ) => {
     updateTechStack({ [field]: value } as Partial<TechStack>);
   }, [updateTechStack]);
+
+  const handleGitHubTokenError = useCallback((error: string) => {
+    if (error.includes("GitHub token not found") || error.includes("Please sign in with GitHub")) {
+      setShowGitHubLoginModal(true);
+      return true;
+    }
+    return false;
+  }, []);
+
+  const handleGitHubLogin = useCallback(async () => {
+    try {
+      await signInWithGithub();
+    } catch (error) {
+      console.error("GitHub login error:", error);
+      showToast("Failed to initiate GitHub login. Please try again.", 'error');
+    }
+  }, [signInWithGithub]);
 
   const fetchGitHubData = useCallback(async () => {
     if (!user) {
@@ -123,8 +142,11 @@ const TechStackComp: React.FC = () => {
       const repositoriesResult = await apiService.getRepositories();
       
       if (!repositoriesResult.success) {
-        showToast(repositoriesResult.error || "Failed to fetch repositories", 'error');
-        setError(repositoriesResult.error || "Failed to fetch repositories");
+        const errorMsg = repositoriesResult.error || "Failed to fetch repositories";
+        if (!handleGitHubTokenError(errorMsg)) {
+          showToast(errorMsg, 'error');
+        }
+        setError(errorMsg);
         return;
       }
 
@@ -193,7 +215,7 @@ const TechStackComp: React.FC = () => {
       setIsLoadingGitHub(false);
       setLoading(false);
     }
-  }, [user, isDataStale, githubData, techStack, updateTechStack, setRepositories, setLanguages, setFrameworks, setTools, setLoading, setError]);
+  }, [user, isDataStale, githubData, techStack, updateTechStack, setRepositories, setLanguages, setFrameworks, setTools, setLoading, setError, handleGitHubTokenError]);
 
   const fetchFrameworksData = useCallback(async () => {
     if (!user) {
@@ -223,8 +245,11 @@ const TechStackComp: React.FC = () => {
       const frameworksResult = await apiService.getFrameworks();
       
       if (!frameworksResult.success) {
-        showToast(frameworksResult.error || "Failed to fetch frameworks", 'error');
-        setError(frameworksResult.error || "Failed to fetch frameworks");
+        const errorMsg = frameworksResult.error || "Failed to fetch frameworks";
+        if (!handleGitHubTokenError(errorMsg)) {
+          showToast(errorMsg, 'error');
+        }
+        setError(errorMsg);
         return;
       }
 
@@ -251,7 +276,7 @@ const TechStackComp: React.FC = () => {
       setIsLoadingFrameworks(false);
       setLoading(false);
     }
-  }, [user, isDataStale, githubData, techStack, updateTechStack, setFrameworks, setLoading, setError]);
+  }, [user, isDataStale, githubData, techStack, updateTechStack, setFrameworks, setLoading, setError, handleGitHubTokenError]);
 
   const fetchToolsData = useCallback(async () => {
     if (!user) {
@@ -281,8 +306,11 @@ const TechStackComp: React.FC = () => {
       const toolsResult = await apiService.getTools();
       
       if (!toolsResult.success) {
-        showToast(toolsResult.error || "Failed to fetch tools", 'error');
-        setError(toolsResult.error || "Failed to fetch tools");
+        const errorMsg = toolsResult.error || "Failed to fetch tools";
+        if (!handleGitHubTokenError(errorMsg)) {
+          showToast(errorMsg, 'error');
+        }
+        setError(errorMsg);
         return;
       }
 
@@ -309,7 +337,7 @@ const TechStackComp: React.FC = () => {
       setIsLoadingTools(false);
       setLoading(false);
     }
-  }, [user, isDataStale, githubData, techStack, updateTechStack, setTools, setLoading, setError]);
+  }, [user, isDataStale, githubData, techStack, updateTechStack, setTools, setLoading, setError, handleGitHubTokenError]);
 
   const fetchAdditionalInfoData = useCallback(async () => {
     if (!user) {
@@ -330,8 +358,11 @@ const TechStackComp: React.FC = () => {
       const githubUserResult = await apiService.getCurrentGitHubUser();
       
       if (!githubUserResult.success || !githubUserResult.data?.login) {
-        showToast("Failed to fetch GitHub username", 'error');
-        setError("Failed to fetch GitHub username");
+        const errorMsg = githubUserResult.error || "Failed to fetch GitHub username";
+        if (!handleGitHubTokenError(errorMsg)) {
+          showToast(errorMsg, 'error');
+        }
+        setError(errorMsg);
         return;
       }
 
@@ -353,8 +384,11 @@ const TechStackComp: React.FC = () => {
       );
       
       if (!contributionsResult.success) {
-        showToast(contributionsResult.error || "Failed to fetch contributions data", 'error');
-        setError(contributionsResult.error || "Failed to fetch contributions data");
+        const errorMsg = contributionsResult.error || "Failed to fetch contributions data";
+        if (!handleGitHubTokenError(errorMsg)) {
+          showToast(errorMsg, 'error');
+        }
+        setError(errorMsg);
         return;
       }
 
@@ -376,7 +410,7 @@ const TechStackComp: React.FC = () => {
       setIsLoadingAdditionalInfo(false);
       setLoading(false);
     }
-  }, [user, githubData, formData, updateTechStack, setLoading, setError]);
+  }, [user, githubData, formData, updateTechStack, setLoading, setError, handleGitHubTokenError]);
 
   return (
     <div>
@@ -706,6 +740,12 @@ const TechStackComp: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <GitHubLoginModal
+        isOpen={showGitHubLoginModal}
+        onClose={() => setShowGitHubLoginModal(false)}
+        onLogin={handleGitHubLogin}
+      />
     </div>
   );
 };
