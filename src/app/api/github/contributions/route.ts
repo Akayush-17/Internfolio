@@ -18,16 +18,17 @@ export async function POST(request: NextRequest) {
 
     if (!githubToken) {
       return NextResponse.json(
-        { error: "GitHub token required. Please sign in with GitHub or provide token in Authorization header" },
+        { success: false, error: "GitHub token required. Please sign in with GitHub or provide token in Authorization header" },
         { status: 401 }
       );
     }
 
-    const { repositories, startDate, endDate, username } = await request.json();
+    const body = await request.json();
+    const { repositories, startDate, endDate, username } = body;
 
     if (!repositories || !Array.isArray(repositories)) {
       return NextResponse.json(
-        { error: "Repositories array is required" },
+        { success: false, error: "Repositories array is required" },
         { status: 400 }
       );
     }
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
     console.error("Error fetching contributions:", error);
     return NextResponse.json(
       { 
+        success: false,
         error: "Failed to fetch contributions",
         details: error instanceof Error ? error.message : "Unknown error"
       },
