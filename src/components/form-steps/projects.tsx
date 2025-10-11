@@ -10,12 +10,13 @@ import useAuthStore from "@/store/auth";
 import { useGitHubStore } from "@/store/githubStore";
 import { apiService } from "@/services/api";
 import { showToast } from "@/components/ui/toast";
+import GitHubLoginModal from "./github-login-modal";
 
 const Projects: React.FC = () => {
   const { formData, addProject, removeProject, addPR, removePR } =
     useFormStore();
   const { projects } = formData;
-  const { user } = useAuthStore();
+  const { user, signInWithGithub } = useAuthStore();
   const { 
     data: githubData, 
     setRepositories, 
@@ -108,6 +109,7 @@ const Projects: React.FC = () => {
   const [isLoadingGitHub, setIsLoadingGitHub] = useState(false);
   const [isLoadingRepoDetails, setIsLoadingRepoDetails] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showGitHubLoginModal, setShowGitHubLoginModal] = useState(false);
 
   // Modal handlers
   const openPRModal = (projectIndex: number) => {
@@ -417,6 +419,23 @@ const Projects: React.FC = () => {
     });
   };
 
+  const handleGitHubTokenError = useCallback((error: string) => {
+    if (error.includes("GitHub token not found") || error.includes("Please sign in with GitHub")) {
+      setShowGitHubLoginModal(true);
+      return true;
+    }
+    return false;
+  }, []);
+
+  const handleGitHubLogin = useCallback(async () => {
+    try {
+      await signInWithGithub();
+    } catch (error) {
+      console.error("GitHub login error:", error);
+      showToast("Failed to initiate GitHub login. Please try again.", 'error');
+    }
+  }, [signInWithGithub]);
+
   const fetchGitHubRepositories = useCallback(async () => {
     if (!user) {
       showToast("Please sign in to fetch GitHub data.", 'error');
@@ -436,8 +455,11 @@ const Projects: React.FC = () => {
       const repositoriesResult = await apiService.getRepositories();
       
       if (!repositoriesResult.success) {
-        showToast(repositoriesResult.error || "Failed to fetch repositories", 'error');
-        setError(repositoriesResult.error || "Failed to fetch repositories");
+        const errorMsg = repositoriesResult.error || "Failed to fetch repositories";
+        if (!handleGitHubTokenError(errorMsg)) {
+          showToast(errorMsg, 'error');
+        }
+        setError(errorMsg);
         return;
       }
 
@@ -456,7 +478,7 @@ const Projects: React.FC = () => {
       setIsLoadingGitHub(false);
       setLoading(false);
     }
-  }, [user, isDataStale, githubData, setRepositories, setLoading, setError]);
+  }, [user, isDataStale, githubData, setRepositories, setLoading, setError, handleGitHubTokenError]);
 
   const handleSelectRepository = useCallback(async (repo: GitHubRepository) => {
     setIsLoadingRepoDetails(true);
@@ -468,7 +490,10 @@ const Projects: React.FC = () => {
       const repoDetailsResult = await apiService.getRepositoryDetails(owner, repoName);
       
       if (!repoDetailsResult.success) {
-        showToast("Failed to fetch repository details", 'error');
+        const errorMsg = repoDetailsResult.error || "Failed to fetch repository details";
+        if (!handleGitHubTokenError(errorMsg)) {
+          showToast(errorMsg, 'error');
+        }
         return;
       }
 
@@ -476,7 +501,14 @@ const Projects: React.FC = () => {
       
       const languages = details.languages ? Object.keys(details.languages) : [];
       
-      const pullRequests: PullRequest[] = details.pullRequests?.slice(0, 5).map((pr: any) => ({
+      const pullRequests: PullRequest[] = details.pullRequests?.slice(0, 5).map((pr: {
+        title: string;
+        body: string | null;
+        html_url: string;
+        merged_at: string | null;
+        state: string;
+        created_at: string;
+      }) => ({
         title: pr.title,
         description: pr.body || "",
         link: pr.html_url,
@@ -510,7 +542,7 @@ const Projects: React.FC = () => {
     } finally {
       setIsLoadingRepoDetails(false);
     }
-  }, []);
+  }, [handleGitHubTokenError]);
 
   const filteredRepositories = githubData.repositories.filter((repo: GitHubRepository) => 
     repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -597,6 +629,12 @@ const Projects: React.FC = () => {
         newDoc={newDoc}
         setNewDoc={setNewDoc}
         handleAddDocs={handleAddDocs}
+      />
+
+      <GitHubLoginModal
+        isOpen={showGitHubLoginModal}
+        onClose={() => setShowGitHubLoginModal(false)}
+        onLogin={handleGitHubLogin}
       />
     </div>
   );
