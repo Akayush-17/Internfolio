@@ -16,6 +16,10 @@ export class GitHubService {
     this.initializeToken();
   }
 
+  public setAccessToken(token: string | null) {
+    this.accessToken = token;
+  }
+
   private async initializeToken() {
     try {
       const { data: { session } } = await supabase.auth.getSession();

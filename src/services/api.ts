@@ -36,7 +36,7 @@ class ApiService {
     }
   }
 
-  async getLanguages(repositories: any) {
+  async getLanguages(repositories: Array<{ owner: string; name: string }>) {
     try {
       const headers = await this.getAuthHeaders();
       const response = await fetch("/api/github/languages", {
@@ -143,23 +143,23 @@ class ApiService {
     }
   }
 
-  async getAllLanguagesForRepositories(repositories: any[]) {
+  async getAllLanguagesForRepositories(repositories: Array<{ owner: string; name: string }>) {
     try {
-      const languagePromises = repositories.map(async (repo: any) => {
+      const languagePromises = repositories.map(async (repo: { owner: string; name: string }) => {
         try {
           const result = await this.getLanguages([{ owner: repo.owner, name: repo.name }]);
           return result.success ? result.data?.languages || {} : {};
-        } catch (error) {
+        } catch {
           return {};
         }
       });
 
       const languageResults = await Promise.all(languagePromises);
-      const allLanguages: any = {};
+      const allLanguages: { [key: string]: number } = {};
       
       languageResults.forEach(languages => {
         Object.entries(languages).forEach(([language, bytes]) => {
-          allLanguages[language] = (allLanguages[language] || 0) + (bytes);
+          allLanguages[language] = (allLanguages[language] || 0) + (bytes as number);
         });
       });
 

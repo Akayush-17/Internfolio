@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { GitHubRepository, GitHubLanguage } from "@/types";
+import { GitHubRepository } from "@/types";
 
 interface GitHubData {
   repositories: GitHubRepository[];
