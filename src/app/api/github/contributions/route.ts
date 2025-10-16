@@ -1,24 +1,30 @@
-import { NextRequest, NextResponse } from "next/server";
-import { githubService } from "@/lib/github";
-import { GitHubContributor } from "@/types";
-import { supabase } from "@/store/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { githubService } from '@/lib/github';
+import { GitHubContributor } from '@/types';
+import { supabase } from '@/store/auth';
 
 export async function POST(request: NextRequest) {
   try {
     let githubToken = null;
-    
+
     const authHeader = request.headers.get('authorization');
-    
+
     if (authHeader) {
       githubToken = authHeader.replace('Bearer ', '');
     } else {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
       githubToken = session?.provider_token;
     }
 
     if (!githubToken) {
       return NextResponse.json(
-        { success: false, error: "GitHub token required. Please sign in with GitHub or provide token in Authorization header" },
+        {
+          success: false,
+          error:
+            'GitHub token required. Please sign in with GitHub or provide token in Authorization header'
+        },
         { status: 401 }
       );
     }
@@ -28,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (!repositories || !Array.isArray(repositories)) {
       return NextResponse.json(
-        { success: false, error: "Repositories array is required" },
+        { success: false, error: 'Repositories array is required' },
         { status: 400 }
       );
     }
@@ -43,11 +49,17 @@ export async function POST(request: NextRequest) {
           githubService.getRepositoryContributors(repo.owner, repo.name)
         ]);
 
-        const totalLinesOfCode = contributors.reduce((total: number, contributor: GitHubContributor) => {
-          return total + contributor.weeks.reduce((weekTotal: number, week: { a: number; d: number }) => {
-            return weekTotal + week.a + week.d;
-          }, 0);
-        }, 0);
+        const totalLinesOfCode = contributors.reduce(
+          (total: number, contributor: GitHubContributor) => {
+            return (
+              total +
+              contributor.weeks.reduce((weekTotal: number, week: { a: number; d: number }) => {
+                return weekTotal + week.a + week.d;
+              }, 0)
+            );
+          },
+          0
+        );
 
         return {
           repository: repo.name,
@@ -84,17 +96,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const totals = contributionResults.reduce((acc, result) => ({
-      totalCommits: acc.totalCommits + result.commits,
-      totalPullRequests: acc.totalPullRequests + result.pullRequests,
-      totalContributors: acc.totalContributors + result.contributors,
-      totalLinesOfCode: acc.totalLinesOfCode + result.totalLinesOfCode
-    }), {
-      totalCommits: 0,
-      totalPullRequests: 0,
-      totalContributors: 0,
-      totalLinesOfCode: 0
-    });
+    const totals = contributionResults.reduce(
+      (acc, result) => ({
+        totalCommits: acc.totalCommits + result.commits,
+        totalPullRequests: acc.totalPullRequests + result.pullRequests,
+        totalContributors: acc.totalContributors + result.contributors,
+        totalLinesOfCode: acc.totalLinesOfCode + result.totalLinesOfCode
+      }),
+      {
+        totalCommits: 0,
+        totalPullRequests: 0,
+        totalContributors: 0,
+        totalLinesOfCode: 0
+      }
+    );
 
     return NextResponse.json({
       success: true,
@@ -107,14 +122,13 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-
   } catch (error) {
-    console.error("Error fetching contributions:", error);
+    console.error('Error fetching contributions:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: "Failed to fetch contributions",
-        details: error instanceof Error ? error.message : "Unknown error"
+        error: 'Failed to fetch contributions',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

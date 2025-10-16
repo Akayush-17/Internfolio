@@ -1,6 +1,6 @@
-import React from "react";
-import { GitHubRepository } from "@/types";
-import GitHubRepositoryCard from "./github-repository-card";
+import React from 'react';
+import { GitHubRepository } from '@/types';
+import GitHubRepositoryCard from './github-repository-card';
 
 interface GitHubRepositoryModalProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ const GitHubRepositoryModal: React.FC<GitHubRepositoryModalProps> = ({
   onSelectRepository,
   isLoading,
   searchTerm,
-  onSearchChange,
+  onSearchChange
 }) => {
   if (!isOpen) return null;
 
@@ -29,12 +29,14 @@ const GitHubRepositoryModal: React.FC<GitHubRepositoryModalProps> = ({
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900">Select a Repository</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -46,7 +48,7 @@ const GitHubRepositoryModal: React.FC<GitHubRepositoryModalProps> = ({
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        
+
         <div className="overflow-y-auto max-h-[calc(80vh-180px)] p-6">
           {isLoading && (
             <div className="flex items-center justify-center py-12">
@@ -54,20 +56,17 @@ const GitHubRepositoryModal: React.FC<GitHubRepositoryModalProps> = ({
               <span className="ml-3 text-gray-600">Loading repository details...</span>
             </div>
           )}
-          
+
           {!isLoading && repositories.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               No repositories found. Try adjusting your search.
             </div>
           )}
 
-          {!isLoading && repositories.map((repo) => (
-            <GitHubRepositoryCard
-              key={repo.id}
-              repo={repo}
-              onClick={onSelectRepository}
-            />
-          ))}
+          {!isLoading &&
+            repositories.map((repo) => (
+              <GitHubRepositoryCard key={repo.id} repo={repo} onClick={onSelectRepository} />
+            ))}
         </div>
       </div>
     </div>
@@ -75,4 +74,3 @@ const GitHubRepositoryModal: React.FC<GitHubRepositoryModalProps> = ({
 };
 
 export default GitHubRepositoryModal;
-

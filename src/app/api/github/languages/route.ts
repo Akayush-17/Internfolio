@@ -1,23 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
-import { githubService } from "@/lib/github";
-import { supabase } from "@/store/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { githubService } from '@/lib/github';
+import { supabase } from '@/store/auth';
 
 export async function POST(request: NextRequest) {
   try {
     let githubToken = null;
-    
+
     const authHeader = request.headers.get('authorization');
-    
+
     if (authHeader) {
       githubToken = authHeader.replace('Bearer ', '');
     } else {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
       githubToken = session?.provider_token;
     }
 
     if (!githubToken) {
       return NextResponse.json(
-        { error: "GitHub token required. Please sign in with GitHub or provide token in Authorization header" },
+        {
+          error:
+            'GitHub token required. Please sign in with GitHub or provide token in Authorization header'
+        },
         { status: 401 }
       );
     }
@@ -25,10 +30,7 @@ export async function POST(request: NextRequest) {
     const { repositories } = await request.json();
 
     if (!repositories || !Array.isArray(repositories)) {
-      return NextResponse.json(
-        { error: "Repositories array is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Repositories array is required' }, { status: 400 });
     }
 
     githubService.setAccessToken(githubToken);
@@ -52,8 +54,8 @@ export async function POST(request: NextRequest) {
     const languageResults = await Promise.all(languagePromises);
 
     const aggregatedLanguages: { [key: string]: number } = {};
-    
-    languageResults.forEach(result => {
+
+    languageResults.forEach((result) => {
       Object.entries(result.languages).forEach(([language, bytes]) => {
         aggregatedLanguages[language] = (aggregatedLanguages[language] || 0) + (bytes as number);
       });
@@ -71,13 +73,12 @@ export async function POST(request: NextRequest) {
         repositories: languageResults
       }
     });
-
   } catch (error) {
-    console.error("Error fetching languages:", error);
+    console.error('Error fetching languages:', error);
     return NextResponse.json(
-      { 
-        error: "Failed to fetch languages",
-        details: error instanceof Error ? error.message : "Unknown error"
+      {
+        error: 'Failed to fetch languages',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

@@ -1,15 +1,15 @@
-import { supabase } from "@/store/auth";
-import { 
-  GitHubRepository, 
-  GitHubPullRequest, 
-  GitHubCommit, 
-  GitHubLanguage, 
-  GitHubContributor 
-} from "@/types";
+import { supabase } from '@/store/auth';
+import {
+  GitHubRepository,
+  GitHubPullRequest,
+  GitHubCommit,
+  GitHubLanguage,
+  GitHubContributor
+} from '@/types';
 
 // GitHub API service
 export class GitHubService {
-  private baseUrl = "https://api.github.com";
+  private baseUrl = 'https://api.github.com';
   private accessToken: string | null = null;
 
   constructor() {
@@ -22,13 +22,15 @@ export class GitHubService {
 
   private async initializeToken() {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+
       if (session?.provider_token) {
         this.accessToken = session.provider_token;
       }
     } catch (error) {
-      console.error("Failed to get GitHub token:", error);
+      console.error('Failed to get GitHub token:', error);
     }
   }
 
@@ -36,18 +38,18 @@ export class GitHubService {
     if (!this.accessToken) {
       await this.initializeToken();
     }
-    
+
     return {
-      "Authorization": `Bearer ${this.accessToken}`,
-      "Accept": "application/vnd.github.v3+json",
-      "User-Agent": "Internfolio-App",
+      Authorization: `Bearer ${this.accessToken}`,
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'Internfolio-App'
     };
   }
 
   async getUserRepositories(): Promise<GitHubRepository[]> {
     const headers = await this.getHeaders();
     const response = await fetch(`${this.baseUrl}/user/repos?sort=updated&per_page=100`, {
-      headers,
+      headers
     });
 
     if (!response.ok) {
@@ -55,7 +57,7 @@ export class GitHubService {
     }
 
     const repositories = await response.json();
-    
+
     try {
       const userId = await this.getCurrentUserId();
       if (userId) {
@@ -78,12 +80,10 @@ export class GitHubService {
           last_synced_at: new Date().toISOString()
         }));
 
-        await supabase
-          .from('github_repositories')
-          .upsert(repositoryData, { 
-            onConflict: 'user_id,github_repo_id',
-            ignoreDuplicates: false 
-          });
+        await supabase.from('github_repositories').upsert(repositoryData, {
+          onConflict: 'user_id,github_repo_id',
+          ignoreDuplicates: false
+        });
       }
     } catch (error) {
       console.error('Error saving repositories to database:', error);
@@ -95,7 +95,7 @@ export class GitHubService {
   async getRepository(owner: string, repo: string): Promise<GitHubRepository> {
     const headers = await this.getHeaders();
     const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}`, {
-      headers,
+      headers
     });
 
     if (!response.ok) {
@@ -108,7 +108,7 @@ export class GitHubService {
   async getRepositoryLanguages(owner: string, repo: string): Promise<GitHubLanguage> {
     const headers = await this.getHeaders();
     const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/languages`, {
-      headers,
+      headers
     });
 
     if (!response.ok) {
@@ -116,7 +116,7 @@ export class GitHubService {
     }
 
     const languages = await response.json();
-    
+
     try {
       const userId = await this.getCurrentUserId();
       if (userId) {
@@ -136,12 +136,10 @@ export class GitHubService {
             last_synced_at: new Date().toISOString()
           }));
 
-          await supabase
-            .from('github_repository_languages')
-            .upsert(languageData, { 
-              onConflict: 'repository_id,language',
-              ignoreDuplicates: false 
-            });
+          await supabase.from('github_repository_languages').upsert(languageData, {
+            onConflict: 'repository_id,language',
+            ignoreDuplicates: false
+          });
         }
       }
     } catch (error) {
@@ -153,9 +151,12 @@ export class GitHubService {
 
   async getRepositoryPullRequests(owner: string, repo: string): Promise<GitHubPullRequest[]> {
     const headers = await this.getHeaders();
-    const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/pulls?state=all&per_page=100`, {
-      headers,
-    });
+    const response = await fetch(
+      `${this.baseUrl}/repos/${owner}/${repo}/pulls?state=all&per_page=100`,
+      {
+        headers
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
@@ -167,13 +168,13 @@ export class GitHubService {
   async getRepositoryCommits(owner: string, repo: string, since?: string): Promise<GitHubCommit[]> {
     const headers = await this.getHeaders();
     let url = `${this.baseUrl}/repos/${owner}/${repo}/commits?per_page=100`;
-    
+
     if (since) {
       url += `&since=${since}`;
     }
 
     const response = await fetch(url, {
-      headers,
+      headers
     });
 
     if (!response.ok) {
@@ -181,7 +182,7 @@ export class GitHubService {
     }
 
     const commits = await response.json();
-    
+
     try {
       const userId = await this.getCurrentUserId();
       if (userId) {
@@ -205,12 +206,10 @@ export class GitHubService {
             last_synced_at: new Date().toISOString()
           }));
 
-          await supabase
-            .from('github_commits')
-            .upsert(commitData, { 
-              onConflict: 'repository_id,commit_sha',
-              ignoreDuplicates: false 
-            });
+          await supabase.from('github_commits').upsert(commitData, {
+            onConflict: 'repository_id,commit_sha',
+            ignoreDuplicates: false
+          });
         }
       }
     } catch (error) {
@@ -223,7 +222,7 @@ export class GitHubService {
   async getRepositoryContributors(owner: string, repo: string): Promise<GitHubContributor[]> {
     const headers = await this.getHeaders();
     const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/stats/contributors`, {
-      headers,
+      headers
     });
 
     if (!response.ok) {
@@ -236,13 +235,13 @@ export class GitHubService {
   async getUserContributions(username: string, from?: string) {
     const headers = await this.getHeaders();
     let url = `${this.baseUrl}/users/${username}/events/public?per_page=100`;
-    
+
     if (from) {
       url += `&since=${from}`;
     }
 
     const response = await fetch(url, {
-      headers,
+      headers
     });
 
     if (!response.ok) {
@@ -250,26 +249,26 @@ export class GitHubService {
     }
 
     const contributions = await response.json();
-    
+
     try {
       const userId = await this.getCurrentUserId();
       if (userId) {
-        const contributionData = contributions.map((contribution: { type: string; repo?: { name: string }; created_at: string }) => ({
-          user_id: userId,
-          username,
-          event_type: contribution.type,
-          repository_name: contribution.repo?.name || null,
-          created_at: contribution.created_at,
-          event_data: contribution,
-          last_synced_at: new Date().toISOString()
-        }));
+        const contributionData = contributions.map(
+          (contribution: { type: string; repo?: { name: string }; created_at: string }) => ({
+            user_id: userId,
+            username,
+            event_type: contribution.type,
+            repository_name: contribution.repo?.name || null,
+            created_at: contribution.created_at,
+            event_data: contribution,
+            last_synced_at: new Date().toISOString()
+          })
+        );
 
-        await supabase
-          .from('github_contributions')
-          .upsert(contributionData, { 
-            onConflict: 'id',
-            ignoreDuplicates: false 
-          });
+        await supabase.from('github_contributions').upsert(contributionData, {
+          onConflict: 'id',
+          ignoreDuplicates: false
+        });
       }
     } catch (error) {
       console.error('Error saving contributions to database:', error);
@@ -280,7 +279,9 @@ export class GitHubService {
 
   private async getCurrentUserId(): Promise<string | null> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
       return session?.user?.id || null;
     } catch {
       return null;
