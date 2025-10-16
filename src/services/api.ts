@@ -1,17 +1,22 @@
-import { supabase } from "@/store/auth";
+import { supabase } from '@/store/auth';
 
 class ApiService {
-  private async getAuthHeaders(): Promise<{ "Authorization": string; "Content-Type": string } | null> {
-    const { data: { session } } = await supabase.auth.getSession();
+  private async getAuthHeaders(): Promise<{
+    Authorization: string;
+    'Content-Type': string;
+  } | null> {
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
     const githubToken = session?.provider_token;
-    
+
     if (!githubToken) {
       return null;
     }
 
     return {
-      "Authorization": `Bearer ${githubToken}`,
-      "Content-Type": "application/json",
+      Authorization: `Bearer ${githubToken}`,
+      'Content-Type': 'application/json'
     };
   }
 
@@ -21,11 +26,11 @@ class ApiService {
       if (!headers) {
         return {
           success: false,
-          error: "GitHub token not found. Please sign in with GitHub."
+          error: 'GitHub token not found. Please sign in with GitHub.'
         };
       }
-      const response = await fetch("/api/github/repositories", {
-        headers,
+      const response = await fetch('/api/github/repositories', {
+        headers
       });
 
       if (!response.ok) {
@@ -34,10 +39,10 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching repositories:", error);
+      console.error('Error fetching repositories:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch repositories"
+        error: error instanceof Error ? error.message : 'Failed to fetch repositories'
       };
     }
   }
@@ -48,13 +53,13 @@ class ApiService {
       if (!headers) {
         return {
           success: false,
-          error: "GitHub token not found. Please sign in with GitHub."
+          error: 'GitHub token not found. Please sign in with GitHub.'
         };
       }
-      const response = await fetch("/api/github/languages", {
-        method: "POST",
+      const response = await fetch('/api/github/languages', {
+        method: 'POST',
         headers,
-        body: JSON.stringify({ repositories }),
+        body: JSON.stringify({ repositories })
       });
 
       if (!response.ok) {
@@ -63,10 +68,10 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching languages:", error);
+      console.error('Error fetching languages:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch languages"
+        error: error instanceof Error ? error.message : 'Failed to fetch languages'
       };
     }
   }
@@ -77,11 +82,11 @@ class ApiService {
       if (!headers) {
         return {
           success: false,
-          error: "GitHub token not found. Please sign in with GitHub."
+          error: 'GitHub token not found. Please sign in with GitHub.'
         };
       }
-      const response = await fetch("/api/github/frameworks", {
-        headers,
+      const response = await fetch('/api/github/frameworks', {
+        headers
       });
 
       if (!response.ok) {
@@ -90,10 +95,10 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching frameworks:", error);
+      console.error('Error fetching frameworks:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch frameworks"
+        error: error instanceof Error ? error.message : 'Failed to fetch frameworks'
       };
     }
   }
@@ -104,11 +109,11 @@ class ApiService {
       if (!headers) {
         return {
           success: false,
-          error: "GitHub token not found. Please sign in with GitHub."
+          error: 'GitHub token not found. Please sign in with GitHub.'
         };
       }
-      const response = await fetch("/api/github/tools", {
-        headers,
+      const response = await fetch('/api/github/tools', {
+        headers
       });
 
       if (!response.ok) {
@@ -117,10 +122,10 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching tools:", error);
+      console.error('Error fetching tools:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch tools"
+        error: error instanceof Error ? error.message : 'Failed to fetch tools'
       };
     }
   }
@@ -131,11 +136,11 @@ class ApiService {
       if (!headers) {
         return {
           success: false,
-          error: "GitHub token not found. Please sign in with GitHub."
+          error: 'GitHub token not found. Please sign in with GitHub.'
         };
       }
       const response = await fetch(`/api/github/repository/${owner}/${repo}`, {
-        headers,
+        headers
       });
 
       if (!response.ok) {
@@ -144,32 +149,37 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching repository details:", error);
+      console.error('Error fetching repository details:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch repository details"
+        error: error instanceof Error ? error.message : 'Failed to fetch repository details'
       };
     }
   }
 
-  async getContributions(repositories?: Array<{ owner: string; name: string }>, startDate?: string, endDate?: string, username?: string) {
+  async getContributions(
+    repositories?: Array<{ owner: string; name: string }>,
+    startDate?: string,
+    endDate?: string,
+    username?: string
+  ) {
     try {
       const headers = await this.getAuthHeaders();
       if (!headers) {
         return {
           success: false,
-          error: "GitHub token not found. Please sign in with GitHub."
+          error: 'GitHub token not found. Please sign in with GitHub.'
         };
       }
-      const response = await fetch("/api/github/contributions", {
-        method: "POST",
+      const response = await fetch('/api/github/contributions', {
+        method: 'POST',
         headers,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           repositories: repositories || [],
           startDate,
           endDate,
           username
-        }),
+        })
       });
 
       if (!response.ok) {
@@ -183,10 +193,13 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching contributions:", error);
+      console.error('Error fetching contributions:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch contributions. Please check your network connection."
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch contributions. Please check your network connection.'
       };
     }
   }
@@ -204,8 +217,8 @@ class ApiService {
 
       const languageResults = await Promise.all(languagePromises);
       const allLanguages: { [key: string]: number } = {};
-      
-      languageResults.forEach(languages => {
+
+      languageResults.forEach((languages) => {
         Object.entries(languages).forEach(([language, bytes]) => {
           allLanguages[language] = (allLanguages[language] || 0) + (bytes as number);
         });
@@ -213,7 +226,7 @@ class ApiService {
 
       return allLanguages;
     } catch (error) {
-      console.error("Error fetching all languages:", error);
+      console.error('Error fetching all languages:', error);
       return {};
     }
   }
@@ -224,14 +237,14 @@ class ApiService {
       if (!headers) {
         return {
           success: false,
-          error: "GitHub token not found. Please sign in with GitHub."
+          error: 'GitHub token not found. Please sign in with GitHub.'
         };
       }
-      const response = await fetch("https://api.github.com/user", {
+      const response = await fetch('https://api.github.com/user', {
         headers: {
           ...headers,
-          "Accept": "application/vnd.github.v3+json",
-        },
+          Accept: 'application/vnd.github.v3+json'
+        }
       });
 
       if (!response.ok) {
@@ -245,14 +258,14 @@ class ApiService {
           login: userData.login,
           name: userData.name,
           email: userData.email,
-          avatar_url: userData.avatar_url,
+          avatar_url: userData.avatar_url
         }
       };
     } catch (error) {
-      console.error("Error fetching GitHub user:", error);
+      console.error('Error fetching GitHub user:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch GitHub user"
+        error: error instanceof Error ? error.message : 'Failed to fetch GitHub user'
       };
     }
   }

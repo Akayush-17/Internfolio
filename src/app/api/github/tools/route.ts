@@ -1,31 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/store/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/store/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
+    const authHeader = request.headers.get('authorization');
     let githubToken: string | null = null;
 
-    if (authHeader && authHeader.startsWith("Bearer ")) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
       githubToken = authHeader.substring(7);
     } else {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
       githubToken = session?.provider_token || null;
     }
 
     if (!githubToken) {
       return NextResponse.json(
-        { success: false, error: "GitHub token not found" },
+        { success: false, error: 'GitHub token not found' },
         { status: 401 }
       );
     }
 
-    const response = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
+    const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=100', {
       headers: {
-        "Authorization": `Bearer ${githubToken}`,
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Internfolio-App",
-      },
+        Authorization: `Bearer ${githubToken}`,
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'Internfolio-App'
+      }
     });
 
     if (!response.ok) {
@@ -33,9 +35,9 @@ export async function GET(request: NextRequest) {
     }
 
     const repositories = await response.json();
-    
+
     const toolsAndPlatforms = new Set<string>();
-    
+
     repositories.forEach((repo: { name?: string; description?: string; topics?: string[] }) => {
       if (repo.topics && Array.isArray(repo.topics)) {
         repo.topics.forEach((topic: string) => {
@@ -90,10 +92,10 @@ export async function GET(request: NextRequest) {
         /\b(unsplash|pexels|shutterstock|getty-images)\b/g
       ];
 
-      patterns.forEach(pattern => {
+      patterns.forEach((pattern) => {
         const matches = combinedText.match(pattern);
         if (matches) {
-          matches.forEach(match => {
+          matches.forEach((match) => {
             const cleanMatch = match.replace(/[^\w\s.-]/g, '').trim();
             if (cleanMatch && cleanMatch.length > 2) {
               toolsAndPlatforms.add(cleanMatch);
@@ -112,12 +114,8 @@ export async function GET(request: NextRequest) {
         count: toolsList.length
       }
     });
-
   } catch (error) {
-    console.error("Error fetching tools:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch tools" },
-      { status: 500 }
-    );
+    console.error('Error fetching tools:', error);
+    return NextResponse.json({ success: false, error: 'Failed to fetch tools' }, { status: 500 });
   }
 }

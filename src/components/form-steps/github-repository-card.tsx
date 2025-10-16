@@ -1,15 +1,12 @@
-import React from "react";
-import { GitHubRepository } from "@/types";
+import React from 'react';
+import { GitHubRepository } from '@/types';
 
 interface GitHubRepositoryCardProps {
   repo: GitHubRepository;
   onClick: (repo: GitHubRepository) => void;
 }
 
-const GitHubRepositoryCard: React.FC<GitHubRepositoryCardProps> = ({
-  repo,
-  onClick,
-}) => {
+const GitHubRepositoryCard: React.FC<GitHubRepositoryCardProps> = ({ repo, onClick }) => {
   return (
     <div
       onClick={() => onClick(repo)}
@@ -17,11 +14,9 @@ const GitHubRepositoryCard: React.FC<GitHubRepositoryCardProps> = ({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-blue-600 hover:text-blue-700">
-            {repo.name}
-          </h3>
+          <h3 className="text-lg font-semibold text-blue-600 hover:text-blue-700">{repo.name}</h3>
           <p className="text-sm text-gray-600 mt-1">
-            {repo.description || "No description available"}
+            {repo.description || 'No description available'}
           </p>
           <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
             {repo.language && (
@@ -38,14 +33,23 @@ const GitHubRepositoryCard: React.FC<GitHubRepositoryCardProps> = ({
             </span>
             <span className="flex items-center gap-1">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
               </svg>
               {repo.forks_count}
             </span>
             <span>Updated: {new Date(repo.updated_at).toLocaleDateString()}</span>
           </div>
         </div>
-        <svg className="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-5 h-5 text-gray-400 mt-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </div>
@@ -54,4 +58,3 @@ const GitHubRepositoryCard: React.FC<GitHubRepositoryCardProps> = ({
 };
 
 export default GitHubRepositoryCard;
-

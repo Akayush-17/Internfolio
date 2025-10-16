@@ -66,7 +66,8 @@ const StepController: React.FC = () => {
               : 'bg-gradient-to-r from-blue-500 to-indigo-600'
           }`}
           disabled={isSubmitting}
-          aria-label={isLastStep ? 'Submit form' : 'Next step'}>
+          aria-label={isLastStep ? 'Submit form' : 'Next step'}
+        >
           {isSubmitting ? (
             <LoaderCircleIcon className="w-6 h-6 animate-spin" />
           ) : isLastStep ? (

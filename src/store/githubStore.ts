@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { GitHubRepository } from "@/types";
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { GitHubRepository } from '@/types';
 
 interface GitHubData {
   repositories: GitHubRepository[];
@@ -14,7 +14,7 @@ interface GitHubData {
 
 interface GitHubStore {
   data: GitHubData;
-  
+
   setRepositories: (repositories: GitHubRepository[]) => void;
   setLanguages: (languages: { [key: string]: number }) => void;
   setFrameworks: (frameworks: string[]) => void;
@@ -32,7 +32,7 @@ const initialState: GitHubData = {
   tools: [],
   lastFetched: null,
   isLoading: false,
-  error: null,
+  error: null
 };
 
 export const useGitHubStore = create<GitHubStore>()(
@@ -46,8 +46,8 @@ export const useGitHubStore = create<GitHubStore>()(
             ...state.data,
             repositories,
             lastFetched: new Date().toISOString(),
-            error: null,
-          },
+            error: null
+          }
         })),
 
       setLanguages: (languages) =>
@@ -56,8 +56,8 @@ export const useGitHubStore = create<GitHubStore>()(
             ...state.data,
             languages,
             lastFetched: new Date().toISOString(),
-            error: null,
-          },
+            error: null
+          }
         })),
 
       setFrameworks: (frameworks) =>
@@ -66,8 +66,8 @@ export const useGitHubStore = create<GitHubStore>()(
             ...state.data,
             frameworks,
             lastFetched: new Date().toISOString(),
-            error: null,
-          },
+            error: null
+          }
         })),
 
       setTools: (tools) =>
@@ -76,16 +76,16 @@ export const useGitHubStore = create<GitHubStore>()(
             ...state.data,
             tools,
             lastFetched: new Date().toISOString(),
-            error: null,
-          },
+            error: null
+          }
         })),
 
       setLoading: (isLoading) =>
         set((state) => ({
           data: {
             ...state.data,
-            isLoading,
-          },
+            isLoading
+          }
         })),
 
       setError: (error) =>
@@ -93,28 +93,28 @@ export const useGitHubStore = create<GitHubStore>()(
           data: {
             ...state.data,
             error,
-            isLoading: false,
-          },
+            isLoading: false
+          }
         })),
 
       clearData: () =>
         set(() => ({
-          data: initialState,
+          data: initialState
         })),
 
       isDataStale: () => {
         const { lastFetched } = get().data;
         if (!lastFetched) return true;
-        
+
         const lastFetchTime = new Date(lastFetched).getTime();
         const now = new Date().getTime();
         const cacheExpirationTime = 60 * 60 * 1000; // 1 hour in milliseconds
-        
+
         return now - lastFetchTime > cacheExpirationTime;
-      },
+      }
     }),
     {
-      name: "github-data-storage",
+      name: 'github-data-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         data: {
@@ -124,9 +124,9 @@ export const useGitHubStore = create<GitHubStore>()(
           tools: state.data.tools,
           lastFetched: state.data.lastFetched,
           isLoading: false,
-          error: null,
-        },
-      }),
+          error: null
+        }
+      })
     }
   )
 );
