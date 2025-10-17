@@ -53,7 +53,8 @@ export default function LandingPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-4xl md:text-5xl font-bold text-center mb-4">
+        className="text-4xl md:text-5xl font-bold text-center mb-4"
+      >
         Create Your Internship Report Effortlessly
       </motion.h1>
 
@@ -61,7 +62,8 @@ export default function LandingPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
-        className="text-lg md:text-xl text-center text-slate-300 max-w-xl mb-8">
+        className="text-lg md:text-xl text-center text-slate-300 max-w-xl mb-8"
+      >
         A polished, professional way to showcase your SDE internship journey — projects,
         contributions, and more.
       </motion.p>
@@ -70,7 +72,8 @@ export default function LandingPage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
-        className="relative">
+        className="relative"
+      >
         <Button
           size="lg"
           className="text-lg px-6 py-4 border border-white cursor-pointer group hover:bg-white hover:text-slate-900 btn-hover-effect"
@@ -80,7 +83,8 @@ export default function LandingPage() {
               label: 'start_report_clicked'
             });
             handleStartReport();
-          }}>
+          }}
+        >
           <RocketIcon className="mr-2 h-5 w-5 transition-all duration-300 group-hover:animate-rocket" />
           <span className="group-hover:text-slate-900 transition-all duration-300">
             <span className="block group-hover:hidden transition-opacity duration-300">
@@ -136,7 +140,8 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-lg p-8 max-w-md w-full shadow-xl">
+            className="bg-white rounded-lg p-8 max-w-md w-full shadow-xl"
+          >
             <h2 className="text-2xl font-bold mb-4 text-gray-800">Authentication Required</h2>
             <p className="mb-6 text-gray-600">
               Please sign in with your Google or GitHub account to submit your internship form.
@@ -147,7 +152,8 @@ export default function LandingPage() {
                   useAuthStore.getState().signInWithGoogle();
                   handleCloseModal();
                 }}
-                className="flex items-center justify-center bg-white text-black border border-gray-300 rounded-md py-2 px-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                className="flex items-center justify-center bg-white text-black border border-gray-300 rounded-md py-2 px-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
                 <Image src={google} alt="" className="w-5 h-5 mr-2" />
                 Sign in with Google
               </button>
@@ -156,7 +162,8 @@ export default function LandingPage() {
                   useAuthStore.getState().signInWithGithub();
                   handleCloseModal();
                 }}
-                className="flex items-center justify-center bg-gray-900 text-white rounded-md py-2 px-4 hover:bg-gray-800 transition-colors cursor-pointer">
+                className="flex items-center justify-center bg-gray-900 text-white rounded-md py-2 px-4 hover:bg-gray-800 transition-colors cursor-pointer"
+              >
                 <Image src={github} alt="" className="w-5 h-5 mr-2" />
                 Sign in with GitHub
               </button>
@@ -164,7 +171,8 @@ export default function LandingPage() {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={handleCloseModal}
-                className="text-gray-600 hover:text-gray-800 cursor-pointer">
+                className="text-gray-600 hover:text-gray-800 cursor-pointer"
+              >
                 Cancel
               </button>
             </div>
