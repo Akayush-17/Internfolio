@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import useAuthStore from "@/store/auth";
-import useFormStore from "@/store/useFormStore";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import useAuthStore from '@/store/auth';
+import useFormStore from '@/store/useFormStore';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function AuthCallbackPage() {
     const handleCallback = async () => {
       await checkAuth();
       await loadFromSupabase(); // Load form data after authentication
-      router.push("/");
+      router.push('/');
     };
 
     handleCallback();

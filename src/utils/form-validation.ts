@@ -1,4 +1,4 @@
-import { FormData } from "@/types";
+import { FormData } from '@/types';
 
 export interface ValidationErrors {
   basicInfo?: {
@@ -23,10 +23,7 @@ export interface ValidationErrors {
   };
 }
 
-export const validateStep = (
-  step: number,
-  formData: FormData
-): ValidationErrors => {
+export const validateStep = (step: number, formData: FormData): ValidationErrors => {
   const errors: ValidationErrors = {};
 
   // Validate Basic Info (Step 1)
@@ -34,39 +31,39 @@ export const validateStep = (
     const { basicInfo } = formData;
     errors.basicInfo = {};
 
-    if (!basicInfo.fullName || basicInfo.fullName.trim() === "") {
-      errors.basicInfo.fullName = "Full Name is required";
+    if (!basicInfo.fullName || basicInfo.fullName.trim() === '') {
+      errors.basicInfo.fullName = 'Full Name is required';
     }
 
     // Email is optional, but validate format if provided
     if (
       basicInfo.email &&
-      basicInfo.email.trim() !== "" &&
+      basicInfo.email.trim() !== '' &&
       !/^\S+@\S+\.\S+$/.test(basicInfo.email)
     ) {
-      errors.basicInfo.email = "Please enter a valid email address";
+      errors.basicInfo.email = 'Please enter a valid email address';
     }
 
-    if (!basicInfo.internshipRole || basicInfo.internshipRole.trim() === "") {
-      errors.basicInfo.internshipRole = "Internship Role is required";
+    if (!basicInfo.internshipRole || basicInfo.internshipRole.trim() === '') {
+      errors.basicInfo.internshipRole = 'Internship Role is required';
     }
 
-    if (!basicInfo.teamDepartment || basicInfo.teamDepartment.trim() === "") {
-      errors.basicInfo.teamDepartment = "Team/Department is required";
+    if (!basicInfo.teamDepartment || basicInfo.teamDepartment.trim() === '') {
+      errors.basicInfo.teamDepartment = 'Team/Department is required';
     }
 
     // Manager name is optional, no validation needed
 
     if (!basicInfo.startDate) {
-      errors.basicInfo.startDate = "Start Date is required";
+      errors.basicInfo.startDate = 'Start Date is required';
     }
 
     if (!basicInfo.endDate) {
-      errors.basicInfo.endDate = "End Date is required";
+      errors.basicInfo.endDate = 'End Date is required';
     }
 
-    if (!basicInfo.summary || basicInfo.summary.trim() === "") {
-      errors.basicInfo.summary = "Summary is required";
+    if (!basicInfo.summary || basicInfo.summary.trim() === '') {
+      errors.basicInfo.summary = 'Summary is required';
     }
 
     // If no errors, remove the basicInfo property
@@ -86,7 +83,7 @@ export const validateStep = (
       techStack.tools.length === 0
     ) {
       errors.techStack = {
-        general: "Please select at least one technology",
+        general: 'Please select at least one technology'
       };
     }
   }
@@ -99,14 +96,12 @@ export const validateStep = (
     if (
       learning.currentlyLearning.length === 0 &&
       learning.interestedIn.length === 0 &&
-      (!learning.technicalLearnings ||
-        learning.technicalLearnings.length === 0) &&
+      (!learning.technicalLearnings || learning.technicalLearnings.length === 0) &&
       (!learning.softSkills || learning.softSkills.length === 0) &&
-      (!learning.crossTeamCollaboration ||
-        learning.crossTeamCollaboration.length === 0)
+      (!learning.crossTeamCollaboration || learning.crossTeamCollaboration.length === 0)
     ) {
       errors.learning = {
-        general: "Please provide information about your learning experience",
+        general: 'Please provide information about your learning experience'
       };
     }
   }
@@ -123,7 +118,7 @@ export const validateStep = (
 
       if (invalidProjects.length > 0) {
         errors.projects = {
-          general: "All projects must have a title, description, and role",
+          general: 'All projects must have a title, description, and role'
         };
       }
 
@@ -142,8 +137,8 @@ export const validateStep = (
         errors.projects = {
           ...errors.projects,
           general:
-            (errors.projects?.general || "") +
-            " All media entries must have a URL (or uploaded file) and a type.",
+            (errors.projects?.general || '') +
+            ' All media entries must have a URL (or uploaded file) and a type.'
         };
       }
 
@@ -152,10 +147,7 @@ export const validateStep = (
         (project) =>
           project.challenges &&
           project.challenges.some(
-            (challenge) =>
-              !challenge.obstacle ||
-              !challenge.approach ||
-              !challenge.resolution
+            (challenge) => !challenge.obstacle || !challenge.approach || !challenge.resolution
           )
       );
 
@@ -163,8 +155,8 @@ export const validateStep = (
         errors.projects = {
           ...errors.projects,
           general:
-            (errors.projects?.general || "") +
-            " All challenges must have an obstacle, approach, and resolution.",
+            (errors.projects?.general || '') +
+            ' All challenges must have an obstacle, approach, and resolution.'
         };
       }
     }

@@ -1,21 +1,19 @@
-"use client"
-import React from "react";
-import { FormData } from "@/types";
-import BasicInfo from "./basic-info";
-import PortfolioStats from "./stats";
-import Projects from "./projects";
-import LearningGrowth from "./learning-growth";
-import Link from "next/link";
-import PDFExportButton from "../internship-report/button";
-import { trackEvent } from "@/lib/mixpanel";
+'use client';
+import React from 'react';
+import { FormData } from '@/types';
+import BasicInfo from './basic-info';
+import PortfolioStats from './stats';
+import Projects from './projects';
+import LearningGrowth from './learning-growth';
+import Link from 'next/link';
+import PDFExportButton from '../internship-report/button';
+import { trackEvent } from '@/lib/mixpanel';
 
 interface PublicPortfolioViewProps {
   data: FormData;
 }
 
-export default function PublicPortfolioView({
-  data,
-}: PublicPortfolioViewProps) {
+export default function PublicPortfolioView({ data }: PublicPortfolioViewProps) {
   return (
     <div className="w-full min-h-screen font-inter">
       <nav className="flex justify-between items-center px-4 py-4 md:px-8 md:py-6">
@@ -26,11 +24,12 @@ export default function PublicPortfolioView({
           <PDFExportButton data={data} />
           <Link
             href="/"
-            onClick={() => 
-              trackEvent("get_your_clicked", {
-                category: "Portfolio Button",
-                label: "get_your_clicked",
-              })}
+            onClick={() =>
+              trackEvent('get_your_clicked', {
+                category: 'Portfolio Button',
+                label: 'get_your_clicked'
+              })
+            }
             className="flex items-center gap-1 md:gap-2 bg-white text-black md:px-6 px-4 py-1 md:py-3 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 no-underline"
           >
             Get your
@@ -49,7 +48,7 @@ export default function PublicPortfolioView({
           </Link>
         </div>
       </nav>
-      
+
       <BasicInfo basicInfo={data.basicInfo} />
       <PortfolioStats projects={data.projects} techStack={data.techStack} />
       <Projects projects={data.projects} />
@@ -59,16 +58,17 @@ export default function PublicPortfolioView({
           Created with Intern<span className="font-bold">folio</span>
         </div>
         <div className="flex space-x-1.5 md:space-x-3">
-          <PDFExportButton place={"footer"} data={data} />
+          <PDFExportButton place={'footer'} data={data} />
           <Link
             href="/"
             onClick={() => {
               console.log('Button clicked!');
-           
-              trackEvent("create_new_clicked", {
-                category: "Portfolio Button",
-                label: "create_new_clicked",
-              }); }}
+
+              trackEvent('create_new_clicked', {
+                category: 'Portfolio Button',
+                label: 'create_new_clicked'
+              });
+            }}
             className="flex items-center gap-1 md:gap-2 bg-white text-black md:px-6 px-4 py-1 md:py-3 rounded-full border border-gray-200 font-medium transition-all duration-200 hover:bg-gray-50 no-underline"
           >
             Create New

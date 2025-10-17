@@ -1,73 +1,64 @@
-import React, { useState, useRef, useCallback } from "react";
-import useFormStore from "@/store/useFormStore";
-import { Project, PullRequest, Tickets, Docs, GitHubRepository } from "@/types";
-import ProjectList from "@/components/form-steps/project-list";
-import ProjectForm from "@/components/form-steps/project-form";
-import ProjectModals from "@/components/form-steps/project-modal";
-import GitHubImportButton from "@/components/form-steps/github-import-button";
-import GitHubRepositoryModal from "@/components/form-steps/github-repository-modal";
-import useAuthStore from "@/store/auth";
-import { useGitHubStore } from "@/store/githubStore";
-import { apiService } from "@/services/api";
-import { showToast } from "@/components/ui/toast";
-import GitHubLoginModal from "./github-login-modal";
+import React, { useState, useRef, useCallback } from 'react';
+import useFormStore from '@/store/useFormStore';
+import { Project, PullRequest, Tickets, Docs, GitHubRepository } from '@/types';
+import ProjectList from '@/components/form-steps/project-list';
+import ProjectForm from '@/components/form-steps/project-form';
+import ProjectModals from '@/components/form-steps/project-modal';
+import GitHubImportButton from '@/components/form-steps/github-import-button';
+import GitHubRepositoryModal from '@/components/form-steps/github-repository-modal';
+import useAuthStore from '@/store/auth';
+import { useGitHubStore } from '@/store/githubStore';
+import { apiService } from '@/services/api';
+import { showToast } from '@/components/ui/toast';
+import GitHubLoginModal from './github-login-modal';
 
 const Projects: React.FC = () => {
-  const { formData, addProject, removeProject, addPR, removePR } =
-    useFormStore();
+  const { formData, addProject, removeProject, addPR, removePR } = useFormStore();
   const { projects } = formData;
   const { user, signInWithGithub } = useAuthStore();
-  const { 
-    data: githubData, 
-    setRepositories, 
-    setLoading, 
-    setError, 
-    isDataStale 
-  } = useGitHubStore();
+  const { data: githubData, setRepositories, setLoading, setError, isDataStale } = useGitHubStore();
 
   const [newProject, setNewProject] = useState<Project>({
-    title: "",
-    description: "",
-    role: "",
+    title: '',
+    description: '',
+    role: '',
     technologies: [],
-    outcome: "",
-    timelineStart: "",
-    timelineEnd: "",
-    link: "",
+    outcome: '',
+    timelineStart: '',
+    timelineEnd: '',
+    link: '',
     pullRequests: [],
     media: [],
     challenges: [],
     tickets: [],
-    docs: [],
+    docs: []
   });
 
-  const [techInput, setTechInput] = useState("");
+  const [techInput, setTechInput] = useState('');
   const [showPRModal, setShowPRModal] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [showChallengeModal, setShowChallengeModal] = useState(false);
-  const [currentProjectIndex, setCurrentProjectIndex] = useState<number | null>(
-    null
-  );
+  const [currentProjectIndex, setCurrentProjectIndex] = useState<number | null>(null);
   const [newPR, setNewPR] = useState<PullRequest>({
-    title: "",
-    description: "",
-    link: "",
-    status: "Open",
-    date: "",
+    title: '',
+    description: '',
+    link: '',
+    status: 'Open',
+    date: ''
   });
 
   const [newMedia, setNewMedia] = useState<{
-    type: "image" | "diagram" | "workflow" | "video";
+    type: 'image' | 'diagram' | 'workflow' | 'video';
     url: string;
     file?: File;
     caption: string;
     isUpload: boolean;
   }>({
-    type: "image",
-    url: "",
+    type: 'image',
+    url: '',
     file: undefined,
-    caption: "",
-    isUpload: false,
+    caption: '',
+    isUpload: false
   });
 
   const [newChallenge, setNewChallenge] = useState<{
@@ -77,11 +68,11 @@ const Projects: React.FC = () => {
     lessonsLearned: string;
     tags: string[];
   }>({
-    obstacle: "",
-    approach: "",
-    resolution: "",
-    lessonsLearned: "",
-    tags: [],
+    obstacle: '',
+    approach: '',
+    resolution: '',
+    lessonsLearned: '',
+    tags: []
   });
 
   const [showTagDropdown, setShowTagDropdown] = useState(false);
@@ -90,25 +81,25 @@ const Projects: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showJiraModal, setShowJiraModal] = useState(false);
   const [newJiraTicket, setNewJiraTicket] = useState<Tickets>({
-    title: "",
-    type: "Story",
-    status: "Done",
-    contribution: "",
-    link: "",
+    title: '',
+    type: 'Story',
+    status: 'Done',
+    contribution: '',
+    link: ''
   });
   const [showDocModal, setShowDocModal] = useState(false);
   const [newDoc, setNewDoc] = useState<Docs>({
-    documentTitle: "",
-    purpose: "",
-    contribution: "",
-    tags: "",
-    link: "",
+    documentTitle: '',
+    purpose: '',
+    contribution: '',
+    tags: '',
+    link: ''
   });
 
   const [showGitHubModal, setShowGitHubModal] = useState(false);
   const [isLoadingGitHub, setIsLoadingGitHub] = useState(false);
   const [isLoadingRepoDetails, setIsLoadingRepoDetails] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [showGitHubLoginModal, setShowGitHubLoginModal] = useState(false);
 
   // Modal handlers
@@ -131,9 +122,9 @@ const Projects: React.FC = () => {
     if (techInput.trim()) {
       setNewProject({
         ...newProject,
-        technologies: [...newProject.technologies, techInput.trim()],
+        technologies: [...newProject.technologies, techInput.trim()]
       });
-      setTechInput("");
+      setTechInput('');
     }
   };
 
@@ -141,19 +132,19 @@ const Projects: React.FC = () => {
     if (newProject.title && newProject.description && newProject.role) {
       addProject(newProject);
       setNewProject({
-        title: "",
-        description: "",
-        role: "",
+        title: '',
+        description: '',
+        role: '',
         technologies: [],
-        outcome: "",
-        timelineStart: "",
-        timelineEnd: "",
-        link: "",
+        outcome: '',
+        timelineStart: '',
+        timelineEnd: '',
+        link: '',
         pullRequests: [],
         media: [],
         challenges: [],
         tickets: [],
-        docs: [],
+        docs: []
       });
     }
   };
@@ -162,11 +153,11 @@ const Projects: React.FC = () => {
     if (newPR.title && newPR.description) {
       addPR(projectIndex, newPR);
       setNewPR({
-        title: "",
-        description: "",
-        link: "",
-        status: "Open",
-        date: "",
+        title: '',
+        description: '',
+        link: '',
+        status: 'Open',
+        date: ''
       });
       setShowPRModal(false);
     }
@@ -187,56 +178,52 @@ const Projects: React.FC = () => {
         ...newMedia,
         file,
         url: localPreviewUrl, // Temporary URL for preview
-        isUpload: true,
+        isUpload: true
       });
 
       // Get authenticated user
       const { user } = useAuthStore.getState();
 
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error('User not authenticated');
       }
 
       // Create a FormData object for Cloudinary upload
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "internfolio"); // Replace with your Cloudinary upload preset
-      formData.append("folder", `interfolio/${user.id}`);
+      formData.append('file', file);
+      formData.append('upload_preset', 'internfolio'); // Replace with your Cloudinary upload preset
+      formData.append('folder', `interfolio/${user.id}`);
 
       // Upload to Cloudinary
       const cloudinaryResponse = await fetch(
-        "https://api.cloudinary.com/v1_1/dxhwhhakx/image/upload", // Replace with your Cloudinary cloud name
+        'https://api.cloudinary.com/v1_1/dxhwhhakx/image/upload', // Replace with your Cloudinary cloud name
         {
-          method: "POST",
-          body: formData,
+          method: 'POST',
+          body: formData
         }
       );
 
       if (!cloudinaryResponse.ok) {
         const errorData = await cloudinaryResponse.json();
-        throw new Error(
-          `Cloudinary upload failed: ${
-            errorData.error?.message || "Unknown error"
-          }`
-        );
+        throw new Error(`Cloudinary upload failed: ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const cloudinaryData = await cloudinaryResponse.json();
-      console.log("Cloudinary upload successful:", cloudinaryData);
+      console.log('Cloudinary upload successful:', cloudinaryData);
 
       // Update media with the permanent Cloudinary URL
       setNewMedia((prev) => ({
         ...prev,
-        url: cloudinaryData.secure_url, // This is the permanent URL
+        url: cloudinaryData.secure_url // This is the permanent URL
       }));
     } catch (error) {
       // Improved error logging
       if (error instanceof Error) {
-        console.error("Error uploading file:", error.message, error);
+        console.error('Error uploading file:', error.message, error);
         alert(`Upload failed: ${error.message}`);
       } else {
-        console.error("Unknown error uploading file:", error);
-        alert("Upload failed due to an unknown error");
+        console.error('Unknown error uploading file:', error);
+        alert('Upload failed due to an unknown error');
       }
       // Keep the local preview URL if upload fails
     } finally {
@@ -248,8 +235,7 @@ const Projects: React.FC = () => {
     // Only allow adding if we have a URL and it's not currently uploading
     if (
       !isUploading &&
-      ((newMedia.isUpload && newMedia.url) ||
-        (!newMedia.isUpload && newMedia.url))
+      ((newMedia.isUpload && newMedia.url) || (!newMedia.isUpload && newMedia.url))
     ) {
       const updatedProjects = [...projects];
       if (!updatedProjects[projectIndex].media) {
@@ -259,34 +245,30 @@ const Projects: React.FC = () => {
       // Create a copy with all required fields explicitly set
       const mediaToAdd = {
         type: newMedia.type,
-        url: newMedia.url || "", // This should now be the Supabase URL for uploads
-        caption: newMedia.caption || "",
-        isUpload: newMedia.isUpload,
+        url: newMedia.url || '', // This should now be the Supabase URL for uploads
+        caption: newMedia.caption || '',
+        isUpload: newMedia.isUpload
       };
 
       updatedProjects[projectIndex].media!.push(mediaToAdd);
 
       useFormStore.getState().updateProject(projectIndex, {
-        media: updatedProjects[projectIndex].media,
+        media: updatedProjects[projectIndex].media
       });
 
       setNewMedia({
-        type: "image",
-        url: "",
+        type: 'image',
+        url: '',
         file: undefined,
-        caption: "",
-        isUpload: false,
+        caption: '',
+        isUpload: false
       });
       setShowMediaModal(false);
     }
   };
 
   const handleAddChallenge = (projectIndex: number) => {
-    if (
-      newChallenge.obstacle &&
-      newChallenge.approach &&
-      newChallenge.resolution
-    ) {
+    if (newChallenge.obstacle && newChallenge.approach && newChallenge.resolution) {
       const updatedProjects = [...projects];
       if (!updatedProjects[projectIndex].challenges) {
         updatedProjects[projectIndex].challenges = [];
@@ -294,15 +276,15 @@ const Projects: React.FC = () => {
       updatedProjects[projectIndex].challenges!.push(newChallenge);
 
       useFormStore.getState().updateProject(projectIndex, {
-        challenges: updatedProjects[projectIndex].challenges,
+        challenges: updatedProjects[projectIndex].challenges
       });
 
       setNewChallenge({
-        obstacle: "",
-        approach: "",
-        resolution: "",
-        lessonsLearned: "",
-        tags: [],
+        obstacle: '',
+        approach: '',
+        resolution: '',
+        lessonsLearned: '',
+        tags: []
       });
       setShowChallengeModal(false);
     }
@@ -310,23 +292,23 @@ const Projects: React.FC = () => {
 
   const removeMedia = (projectIndex: number, mediaIndex: number) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].media = updatedProjects[
-      projectIndex
-    ].media!.filter((_, i) => i !== mediaIndex);
+    updatedProjects[projectIndex].media = updatedProjects[projectIndex].media!.filter(
+      (_, i) => i !== mediaIndex
+    );
 
     useFormStore.getState().updateProject(projectIndex, {
-      media: updatedProjects[projectIndex].media,
+      media: updatedProjects[projectIndex].media
     });
   };
 
   const removeChallenge = (projectIndex: number, challengeIndex: number) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].challenges = updatedProjects[
-      projectIndex
-    ].challenges!.filter((_, i) => i !== challengeIndex);
+    updatedProjects[projectIndex].challenges = updatedProjects[projectIndex].challenges!.filter(
+      (_, i) => i !== challengeIndex
+    );
 
     useFormStore.getState().updateProject(projectIndex, {
-      challenges: updatedProjects[projectIndex].challenges,
+      challenges: updatedProjects[projectIndex].challenges
     });
   };
 
@@ -334,8 +316,8 @@ const Projects: React.FC = () => {
     setNewMedia({
       ...newMedia,
       isUpload: !newMedia.isUpload,
-      url: "",
-      file: undefined,
+      url: '',
+      file: undefined
     });
   };
 
@@ -353,15 +335,15 @@ const Projects: React.FC = () => {
       updatedProjects[projectIndex].docs!.push(newDoc);
 
       useFormStore.getState().updateProject(projectIndex, {
-        docs: updatedProjects[projectIndex].docs,
+        docs: updatedProjects[projectIndex].docs
       });
 
       setNewDoc({
-        documentTitle: "",
-        purpose: "",
-        contribution: "",
-        tags: "",
-        link: "",
+        documentTitle: '',
+        purpose: '',
+        contribution: '',
+        tags: '',
+        link: ''
       });
       setShowDocModal(false);
     }
@@ -369,15 +351,14 @@ const Projects: React.FC = () => {
 
   const removeDocs = (projectIndex: number, docIndex: number) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].docs = updatedProjects[
-      projectIndex
-    ].docs!.filter((_, i) => i !== docIndex);
+    updatedProjects[projectIndex].docs = updatedProjects[projectIndex].docs!.filter(
+      (_, i) => i !== docIndex
+    );
 
     useFormStore.getState().updateProject(projectIndex, {
-      docs: updatedProjects[projectIndex].docs,
+      docs: updatedProjects[projectIndex].docs
     });
   };
-
 
   const openJiraModal = (projectIndex: number) => {
     setCurrentProjectIndex(projectIndex);
@@ -394,15 +375,15 @@ const Projects: React.FC = () => {
       updatedProjects[projectIndex].tickets!.push(newJiraTicket);
 
       useFormStore.getState().updateProject(projectIndex, {
-        tickets: updatedProjects[projectIndex].tickets,
+        tickets: updatedProjects[projectIndex].tickets
       });
 
       setNewJiraTicket({
-        title: "",
-        type: "Story",
-        status: "Done",
-        contribution: "",
-        link: "",
+        title: '',
+        type: 'Story',
+        status: 'Done',
+        contribution: '',
+        link: ''
       });
       setShowJiraModal(false);
     }
@@ -410,17 +391,17 @@ const Projects: React.FC = () => {
 
   const removeJiraTicket = (projectIndex: number, ticketIndex: number) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].tickets = updatedProjects[
-      projectIndex
-    ].tickets!.filter((_, i) => i !== ticketIndex);
+    updatedProjects[projectIndex].tickets = updatedProjects[projectIndex].tickets!.filter(
+      (_, i) => i !== ticketIndex
+    );
 
     useFormStore.getState().updateProject(projectIndex, {
-      tickets: updatedProjects[projectIndex].tickets,
+      tickets: updatedProjects[projectIndex].tickets
     });
   };
 
   const handleGitHubTokenError = useCallback((error: string) => {
-    if (error.includes("GitHub token not found") || error.includes("Please sign in with GitHub")) {
+    if (error.includes('GitHub token not found') || error.includes('Please sign in with GitHub')) {
       setShowGitHubLoginModal(true);
       return true;
     }
@@ -431,14 +412,14 @@ const Projects: React.FC = () => {
     try {
       await signInWithGithub();
     } catch (error) {
-      console.error("GitHub login error:", error);
-      showToast("Failed to initiate GitHub login. Please try again.", 'error');
+      console.error('GitHub login error:', error);
+      showToast('Failed to initiate GitHub login. Please try again.', 'error');
     }
   }, [signInWithGithub]);
 
   const fetchGitHubRepositories = useCallback(async () => {
     if (!user) {
-      showToast("Please sign in to fetch GitHub data.", 'error');
+      showToast('Please sign in to fetch GitHub data.', 'error');
       return;
     }
 
@@ -453,9 +434,9 @@ const Projects: React.FC = () => {
 
     try {
       const repositoriesResult = await apiService.getRepositories();
-      
+
       if (!repositoriesResult.success) {
-        const errorMsg = repositoriesResult.error || "Failed to fetch repositories";
+        const errorMsg = repositoriesResult.error || 'Failed to fetch repositories';
         if (!handleGitHubTokenError(errorMsg)) {
           showToast(errorMsg, 'error');
         }
@@ -468,85 +449,104 @@ const Projects: React.FC = () => {
         setShowGitHubModal(true);
         showToast(`Fetched ${repositoriesResult.data.length} repositories!`, 'success');
       } else {
-        showToast("No repositories found.", 'info');
+        showToast('No repositories found.', 'info');
       }
     } catch (error) {
-      console.error("Error fetching GitHub repositories:", error);
-      showToast("Failed to fetch GitHub repositories. Please try again.", 'error');
-      setError("Failed to fetch GitHub repositories");
+      console.error('Error fetching GitHub repositories:', error);
+      showToast('Failed to fetch GitHub repositories. Please try again.', 'error');
+      setError('Failed to fetch GitHub repositories');
     } finally {
       setIsLoadingGitHub(false);
       setLoading(false);
     }
-  }, [user, isDataStale, githubData, setRepositories, setLoading, setError, handleGitHubTokenError]);
+  }, [
+    user,
+    isDataStale,
+    githubData,
+    setRepositories,
+    setLoading,
+    setError,
+    handleGitHubTokenError
+  ]);
 
-  const handleSelectRepository = useCallback(async (repo: GitHubRepository) => {
-    setIsLoadingRepoDetails(true);
-    
-    try {
-      const owner = repo.full_name.split('/')[0];
-      const repoName = repo.name;
+  const handleSelectRepository = useCallback(
+    async (repo: GitHubRepository) => {
+      setIsLoadingRepoDetails(true);
 
-      const repoDetailsResult = await apiService.getRepositoryDetails(owner, repoName);
-      
-      if (!repoDetailsResult.success) {
-        const errorMsg = repoDetailsResult.error || "Failed to fetch repository details";
-        if (!handleGitHubTokenError(errorMsg)) {
-          showToast(errorMsg, 'error');
+      try {
+        const owner = repo.full_name.split('/')[0];
+        const repoName = repo.name;
+
+        const repoDetailsResult = await apiService.getRepositoryDetails(owner, repoName);
+
+        if (!repoDetailsResult.success) {
+          const errorMsg = repoDetailsResult.error || 'Failed to fetch repository details';
+          if (!handleGitHubTokenError(errorMsg)) {
+            showToast(errorMsg, 'error');
+          }
+          return;
         }
-        return;
+
+        const details = repoDetailsResult.data;
+
+        const languages = details.languages ? Object.keys(details.languages) : [];
+
+        const pullRequests: PullRequest[] =
+          details.pullRequests
+            ?.slice(0, 5)
+            .map(
+              (pr: {
+                title: string;
+                body: string | null;
+                html_url: string;
+                merged_at: string | null;
+                state: string;
+                created_at: string;
+              }) => ({
+                title: pr.title,
+                description: pr.body || '',
+                link: pr.html_url,
+                status: pr.merged_at ? 'Merged' : pr.state === 'open' ? 'Open' : 'Closed',
+                date: pr.created_at
+              })
+            ) || [];
+
+        setNewProject({
+          title: repo.name,
+          description: repo.description || `GitHub repository: ${repo.name}`,
+          role: '',
+          technologies: languages,
+          outcome: '',
+          timelineStart: repo.created_at
+            ? new Date(repo.created_at).toISOString().split('T')[0]
+            : '',
+          timelineEnd: repo.updated_at ? new Date(repo.updated_at).toISOString().split('T')[0] : '',
+          link: repo.html_url,
+          pullRequests: pullRequests,
+          media: [],
+          challenges: [],
+          tickets: [],
+          docs: []
+        });
+
+        setShowGitHubModal(false);
+        showToast(`Project details loaded from ${repo.name}!`, 'success');
+
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      } catch (error) {
+        console.error('Error fetching repository details:', error);
+        showToast('Failed to fetch repository details. Please try again.', 'error');
+      } finally {
+        setIsLoadingRepoDetails(false);
       }
+    },
+    [handleGitHubTokenError]
+  );
 
-      const details = repoDetailsResult.data;
-      
-      const languages = details.languages ? Object.keys(details.languages) : [];
-      
-      const pullRequests: PullRequest[] = details.pullRequests?.slice(0, 5).map((pr: {
-        title: string;
-        body: string | null;
-        html_url: string;
-        merged_at: string | null;
-        state: string;
-        created_at: string;
-      }) => ({
-        title: pr.title,
-        description: pr.body || "",
-        link: pr.html_url,
-        status: pr.merged_at ? "Merged" : pr.state === "open" ? "Open" : "Closed",
-        date: pr.created_at,
-      })) || [];
-
-      setNewProject({
-        title: repo.name,
-        description: repo.description || `GitHub repository: ${repo.name}`,
-        role: "",
-        technologies: languages,
-        outcome: "",
-        timelineStart: repo.created_at ? new Date(repo.created_at).toISOString().split('T')[0] : "",
-        timelineEnd: repo.updated_at ? new Date(repo.updated_at).toISOString().split('T')[0] : "",
-        link: repo.html_url,
-        pullRequests: pullRequests,
-        media: [],
-        challenges: [],
-        tickets: [],
-        docs: [],
-      });
-
-      setShowGitHubModal(false);
-      showToast(`Project details loaded from ${repo.name}!`, 'success');
-      
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    } catch (error) {
-      console.error("Error fetching repository details:", error);
-      showToast("Failed to fetch repository details. Please try again.", 'error');
-    } finally {
-      setIsLoadingRepoDetails(false);
-    }
-  }, [handleGitHubTokenError]);
-
-  const filteredRepositories = githubData.repositories.filter((repo: GitHubRepository) => 
-    repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (repo.description && repo.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredRepositories = githubData.repositories.filter(
+    (repo: GitHubRepository) =>
+      repo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (repo.description && repo.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

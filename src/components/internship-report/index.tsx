@@ -1,9 +1,9 @@
-"use client";
-import React, { useRef, useEffect, useState } from "react";
-import { FormData } from "@/types";
-import { formatDate, calculateDuration } from "@/utils/dateUtils";
-import "../../app/globals.css";
-import { trackEvent } from "@/lib/mixpanel";
+'use client';
+import React, { useRef, useEffect, useState } from 'react';
+import { FormData } from '@/types';
+import { formatDate, calculateDuration } from '@/utils/dateUtils';
+import '../../app/globals.css';
+import { trackEvent } from '@/lib/mixpanel';
 
 interface PDFGeneratorProps {
   onClose?: () => void;
@@ -28,8 +28,8 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
     try {
       // Import libraries dynamically
       const [jsPDFModule, html2canvasModule] = await Promise.all([
-        import("jspdf"),
-        import("html2canvas-pro"),
+        import('jspdf'),
+        import('html2canvas-pro')
       ]);
 
       const jsPDF = jsPDFModule.default;
@@ -39,21 +39,21 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
       const fileName = `${formData.basicInfo.fullName} - Internship Report.pdf`;
 
       // Create a new jsPDF instance
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
       // Create a temporary clone of the element to modify its styles
       const clonedElement = element.cloneNode(true) as HTMLElement;
-      const tempContainer = document.createElement("div");
+      const tempContainer = document.createElement('div');
       tempContainer.appendChild(clonedElement);
-      tempContainer.style.position = "absolute";
-      tempContainer.style.left = "-9999px";
-      tempContainer.style.top = "-9999px";
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '-9999px';
       document.body.appendChild(tempContainer);
 
       // Find and replace any oklch colors in the cloned element with standard RGB
-      const allElements = clonedElement.querySelectorAll("*");
+      const allElements = clonedElement.querySelectorAll('*');
       allElements.forEach((el) => {
         const computedStyle = window.getComputedStyle(el as Element);
         const backgroundColor = computedStyle.backgroundColor;
@@ -74,10 +74,10 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
           logging: false,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: "#ffffff",
+          backgroundColor: '#ffffff'
         });
 
-        const imgData = canvas.toDataURL("image/jpeg", 1.0);
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
         const imgWidth = pdfWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -86,7 +86,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
         let pageCount = 0;
 
         // Add first page
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
         heightLeft -= pdfHeight;
         pageCount++;
 
@@ -94,7 +94,7 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
         while (heightLeft > 0) {
           position = -pdfHeight * pageCount;
           pdf.addPage();
-          pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
           heightLeft -= pdfHeight;
           pageCount++;
         }
@@ -107,10 +107,8 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
       // Clean up
       document.body.removeChild(tempContainer);
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert(
-        "Failed to generate PDF. Please try again or use another approach."
-      );
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again or use another approach.');
     } finally {
       setIsGenerating(false);
     }
@@ -128,16 +126,15 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
           <div className="flex gap-3">
             <button
               onClick={() => {
-                trackEvent("generate_pdf_clicked", {
-                    category: "Portfolio Button",
-                    label: "generate_pdf_clicked",
-                  });
-                generatePDF()
-                
+                trackEvent('generate_pdf_clicked', {
+                  category: 'Portfolio Button',
+                  label: 'generate_pdf_clicked'
+                });
+                generatePDF();
               }}
               disabled={isGenerating}
               className={`md:px-4 md:py-2 px-2 py-1 bg-blue-2001 text-blue-9001 rounded-xl hover:bg-blue-3001 transition-colors flex items-center gap-2 ${
-                isGenerating ? "opacity-70 cursor-not-allowed" : ""
+                isGenerating ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
               {isGenerating ? (
@@ -187,12 +184,11 @@ const PDFGenerator: React.FC<PDFGeneratorProps> = ({ onClose, data }) => {
             {onClose && (
               <button
                 onClick={() => {
-                    trackEvent("close_preview_clicked", {
-                        category: "Portfolio Button",
-                        label: "close_preview_clicked",
-                      });
-                  onClose()
-                 
+                  trackEvent('close_preview_clicked', {
+                    category: 'Portfolio Button',
+                    label: 'close_preview_clicked'
+                  });
+                  onClose();
                 }}
                 className="px-4 py-2 bg-gray-2001 rounded-xl hover:bg-gray-300 transition-colors"
                 disabled={isGenerating}
@@ -223,21 +219,17 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
   return (
     <div
       className="font-serif text-black1 max-w-[210mm]"
-      style={{ fontFamily: "Georgia, Times New Roman, serif" }}
+      style={{ fontFamily: 'Georgia, Times New Roman, serif' }}
     >
       <div className="text-center mb-10 pb-6 border-b border-gray-2001">
         <h1 className="text-3xl font-bold mb-2">INTERNSHIP REPORT</h1>
-        <h2 className="text-xl mb-4 text-gray-7001">
-          {basicInfo.teamDepartment} Team
-        </h2>
+        <h2 className="text-xl mb-4 text-gray-7001">{basicInfo.teamDepartment} Team</h2>
         <div className="flex justify-center items-center gap-2 mb-6">
           <span className="inline-block h-1 w-10 bg-gray-300"></span>
           <p className="text-lg text-gray-6001">
             {basicInfo.startDate && basicInfo.endDate
-              ? `${formatDate(basicInfo.startDate)} - ${formatDate(
-                  basicInfo.endDate
-                )}`
-              : "Duration not specified"}
+              ? `${formatDate(basicInfo.startDate)} - ${formatDate(basicInfo.endDate)}`
+              : 'Duration not specified'}
             {basicInfo.startDate && basicInfo.endDate && (
               <span className="text-sm ml-2">
                 ({calculateDuration(basicInfo.startDate, basicInfo.endDate)})
@@ -252,9 +244,7 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
 
       {/* Table of Contents */}
       <div className="mb-10 pb-4 border-b border-gray-2001 page-break-after-avoid">
-        <h2 className="text-xl font-bold mb-4 text-gray-8001">
-          Table of Contents
-        </h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-8001">Table of Contents</h2>
         <ol className="list-decimal ml-8 space-y-1 text-gray-7001">
           <li className="mb-1">Introduction</li>
           <li className="mb-1">Team Information</li>
@@ -271,10 +261,10 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
           1. Introduction
         </h2>
         <p className="mb-4 leading-relaxed">
-          This report summarizes my internship experience as{" "}
-          <span className="font-semibold">{basicInfo.internshipRole}</span> at{" "}
+          This report summarizes my internship experience as{' '}
+          <span className="font-semibold">{basicInfo.internshipRole}</span> at{' '}
           <span className="font-semibold">{basicInfo.teamDepartment}</span>
-          {""}Team.
+          {''}Team.
         </p>
         <p className="leading-relaxed">{basicInfo.summary}</p>
       </section>
@@ -285,8 +275,7 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
           2. Team Information
         </h2>
         <p className="mb-3 leading-relaxed">
-          <span className="font-semibold">Manager:</span>{" "}
-          {basicInfo.managerName}
+          <span className="font-semibold">Manager:</span> {basicInfo.managerName}
         </p>
         {basicInfo.teammates && basicInfo.teammates.length > 0 && (
           <div className="mb-4">
@@ -309,17 +298,12 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </h2>
 
         <div className="mb-6">
-          <h3 className="text-lg font-bold mb-2 text-gray-7001">
-            Programming Languages
-          </h3>
+          <h3 className="text-lg font-bold mb-2 text-gray-7001">Programming Languages</h3>
           <div className="bg-gray-501 p-3 border border-gray-2001 rounded">
             {techStack.languages && techStack.languages.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {techStack.languages.map((lang, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-block bg-gray-2001 px-2 py-1 rounded text-sm"
-                  >
+                  <span key={idx} className="inline-block bg-gray-2001 px-2 py-1 rounded text-sm">
                     {lang}
                   </span>
                 ))}
@@ -331,17 +315,12 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-bold mb-2 text-gray-7001">
-            Frameworks & Libraries
-          </h3>
+          <h3 className="text-lg font-bold mb-2 text-gray-7001">Frameworks & Libraries</h3>
           <div className="bg-gray-501 p-3 border border-gray-2001 rounded">
             {techStack.frameworks && techStack.frameworks.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {techStack.frameworks.map((framework, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-block bg-gray-2001 px-2 py-1 rounded text-sm"
-                  >
+                  <span key={idx} className="inline-block bg-gray-2001 px-2 py-1 rounded text-sm">
                     {framework}
                   </span>
                 ))}
@@ -353,17 +332,12 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-bold mb-2 text-gray-7001">
-            Tools & Software
-          </h3>
+          <h3 className="text-lg font-bold mb-2 text-gray-7001">Tools & Software</h3>
           <div className="bg-gray-501 p-3 border border-gray-2001 rounded">
             {techStack.tools && techStack.tools.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {techStack.tools.map((tool, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-block bg-gray-2001 px-2 py-1 rounded text-sm"
-                  >
+                  <span key={idx} className="inline-block bg-gray-2001 px-2 py-1 rounded text-sm">
                     {tool}
                   </span>
                 ))}
@@ -376,9 +350,7 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
 
         {techStack.other && (
           <div className="mb-4">
-            <h3 className="text-lg font-bold mb-2 text-gray-7001">
-              Other Technical Details
-            </h3>
+            <h3 className="text-lg font-bold mb-2 text-gray-7001">Other Technical Details</h3>
             <p className="bg-gray-501 p-3 border border-gray-2001 rounded leading-relaxed">
               {techStack.other}
             </p>
@@ -398,9 +370,7 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
               key={index}
               className="mb-8 pb-8 border-b border-gray-1001 page-break-inside-avoid"
             >
-              <h3 className="text-lg font-bold mb-3 text-gray-7001">
-                {project.title}
-              </h3>
+              <h3 className="text-lg font-bold mb-3 text-gray-7001">{project.title}</h3>
 
               <div className="mb-4">
                 <p className="font-semibold mb-1">Description:</p>
@@ -430,8 +400,7 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
                   <ul className="list-disc ml-6 space-y-2">
                     {project.pullRequests.map((pr, prIndex) => (
                       <li key={prIndex} className="leading-relaxed">
-                        <span className="font-medium">{pr.title}</span> -{" "}
-                        {pr.description}
+                        <span className="font-medium">{pr.title}</span> - {pr.description}
                       </li>
                     ))}
                   </ul>
@@ -449,15 +418,10 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
 
               {project.challenges && project.challenges.length > 0 && (
                 <div className="mb-4">
-                  <p className="font-semibold mb-1">
-                    Challenges and Solutions:
-                  </p>
+                  <p className="font-semibold mb-1">Challenges and Solutions:</p>
                   <div className="space-y-3">
                     {project.challenges.map((challenge, idx) => (
-                      <div
-                        key={idx}
-                        className="bg-gray-501 p-3 border border-gray-2001 rounded"
-                      >
+                      <div key={idx} className="bg-gray-501 p-3 border border-gray-2001 rounded">
                         <p className="leading-relaxed">{challenge.obstacle}</p>
                       </div>
                     ))}
@@ -481,8 +445,7 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
           <h3 className="text-lg font-bold mb-2 text-gray-7001">
             Skills and Technologies Acquired
           </h3>
-          {learning.currentlyLearning &&
-          learning.currentlyLearning.length > 0 ? (
+          {learning.currentlyLearning && learning.currentlyLearning.length > 0 ? (
             <ul className="list-disc ml-8 space-y-2">
               {learning.currentlyLearning.map((item, index) => (
                 <li key={index} className="leading-relaxed">
@@ -496,9 +459,7 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </div>
 
         <div className="mb-4">
-          <h3 className="text-lg font-bold mb-2 text-gray-7001">
-            Future Learning Interests
-          </h3>
+          <h3 className="text-lg font-bold mb-2 text-gray-7001">Future Learning Interests</h3>
           {learning.interestedIn && learning.interestedIn.length > 0 ? (
             <ul className="list-disc ml-8 space-y-2">
               {learning.interestedIn.map((item, index) => (
@@ -513,23 +474,17 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-bold mb-2 text-gray-7001">
-            Technical Learnings
-          </h3>
-          {learning.technicalLearningEntries &&
-          learning.technicalLearningEntries.length > 0 ? (
+          <h3 className="text-lg font-bold mb-2 text-gray-7001">Technical Learnings</h3>
+          {learning.technicalLearningEntries && learning.technicalLearningEntries.length > 0 ? (
             <ul className="list-disc ml-8 space-y-4">
               {learning.technicalLearningEntries.map((entry, index) => (
                 <li key={index} className="leading-relaxed">
-                  <h4 className="font-semibold text-gray-8001">
-                    {entry.title}
-                  </h4>
+                  <h4 className="font-semibold text-gray-8001">{entry.title}</h4>
                   <p className="text-gray-6001 mt-2">
                     <span className="font-bold">Context:</span> {entry.context}
                   </p>
                   <p className="text-gray-6001 mt-2">
-                    <span className="font-bold">Learning:</span>{" "}
-                    {entry.learning}
+                    <span className="font-bold">Learning:</span> {entry.learning}
                   </p>
                 </li>
               ))}
@@ -540,22 +495,17 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-bold mb-2 text-gray-7001">
-            Soft Skills Developed
-          </h3>
+          <h3 className="text-lg font-bold mb-2 text-gray-7001">Soft Skills Developed</h3>
           {learning.softSkills && learning.softSkills?.length > 0 ? (
             <ul className="list-disc ml-8 space-y-4">
               {learning.softSkills.map((entry, index) => (
                 <li key={index} className="leading-relaxed">
-                  <h4 className="font-semibold text-gray-8001">
-                    {entry.title}
-                  </h4>
+                  <h4 className="font-semibold text-gray-8001">{entry.title}</h4>
                   <p className="text-gray-6001 mt-2">
                     <span className="font-bold">Context:</span> {entry.context}
                   </p>
                   <p className="text-gray-6001 mt-2">
-                    <span className="font-bold">Learning:</span>{" "}
-                    {entry.learning}
+                    <span className="font-bold">Learning:</span> {entry.learning}
                   </p>
                 </li>
               ))}
@@ -566,28 +516,21 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-bold mb-2 text-gray-7001">
-            Cross-Team Collaboration
-          </h3>
-          {learning.crossTeamCollaboration &&
-          learning.crossTeamCollaboration?.length > 0 ? (
+          <h3 className="text-lg font-bold mb-2 text-gray-7001">Cross-Team Collaboration</h3>
+          {learning.crossTeamCollaboration && learning.crossTeamCollaboration?.length > 0 ? (
             <ul className="list-disc ml-8 space-y-4">
               {learning.crossTeamCollaboration.map((entry, index) => (
                 <li key={index} className="leading-relaxed">
-                  <h4 className="font-semibold text-gray-8001">
-                    {entry.title}
-                  </h4>
+                  <h4 className="font-semibold text-gray-8001">{entry.title}</h4>
                   <p className="text-gray-6001 mt-2">
                     <span className="font-bold">Context:</span> {entry.context}
                   </p>
                   <p className="text-gray-6001 mt-2">
-                    <span className="font-bold">Learning:</span>{" "}
-                    {entry.learning}
+                    <span className="font-bold">Learning:</span> {entry.learning}
                   </p>
                   {entry.teams && entry.teams.length > 0 && (
                     <p className="text-gray-6001 mt-2">
-                      <span className="font-bold">Teams:</span>{" "}
-                      {entry.teams.join(", ")}
+                      <span className="font-bold">Teams:</span> {entry.teams.join(', ')}
                     </p>
                   )}
                 </li>
@@ -605,21 +548,15 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
           6. Conclusion
         </h2>
         <p className="leading-relaxed">
-          This internship as{" "}
-          <span className="font-semibold">{basicInfo.internshipRole}</span> at
-          <span className="font-semibold">
-            {" "}
-            {basicInfo.teamDepartment} Team
-          </span>{" "}
-          has provided valuable professional experience and contributed
-          significantly to my career development. I worked on{" "}
-          {projects?.length || 0} project
-          {(projects?.length || 0) !== 1 ? "s" : ""}, developed skills in
+          This internship as <span className="font-semibold">{basicInfo.internshipRole}</span> at
+          <span className="font-semibold"> {basicInfo.teamDepartment} Team</span> has provided
+          valuable professional experience and contributed significantly to my career development. I
+          worked on {projects?.length || 0} project
+          {(projects?.length || 0) !== 1 ? 's' : ''}, developed skills in
           {techStack.languages && techStack.languages.length > 0
-            ? " " + techStack.languages.join(", ")
-            : ""}
-          , and gained practical knowledge of software development in a
-          professional environment.
+            ? ' ' + techStack.languages.join(', ')
+            : ''}
+          , and gained practical knowledge of software development in a professional environment.
         </p>
       </section>
 
@@ -628,10 +565,8 @@ const InternshipReport: React.FC<{ data: FormData }> = ({ data }) => {
         <p>{basicInfo.fullName} - Internship Report</p>
         <p className="mt-1">
           {basicInfo.startDate && basicInfo.endDate
-            ? `${formatDate(basicInfo.startDate)} - ${formatDate(
-                basicInfo.endDate
-              )}`
-            : "No dates specified"}
+            ? `${formatDate(basicInfo.startDate)} - ${formatDate(basicInfo.endDate)}`
+            : 'No dates specified'}
         </p>
       </div>
     </div>

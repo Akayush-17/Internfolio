@@ -1,7 +1,16 @@
-"use client";
-import React, { useState } from "react";
-import { Book, BookOpen, Users, Code, ChevronDown, ChevronUp, PieChart, Network } from "lucide-react";
-import { Learning } from "@/types";
+'use client';
+import React, { useState } from 'react';
+import {
+  Book,
+  BookOpen,
+  Users,
+  Code,
+  ChevronDown,
+  ChevronUp,
+  PieChart,
+  Network
+} from 'lucide-react';
+import { Learning } from '@/types';
 
 interface LearningGrowthProps {
   learning: Learning;
@@ -14,13 +23,13 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
     softSkills: true,
     collaboration: true
   });
-  
+
   // State for chart view (distribution vs growth)
   // const [activeChartView, setActiveChartView] = useState<'distribution' | 'growth'>('distribution');
 
   // Toggle section visibility
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section]
     }));
@@ -28,7 +37,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
 
   // Calculate skill totals for the chart
   // const skillTotal = (learning.currentlyLearning?.length || 0) + (learning.interestedIn?.length || 0);
-  
+
   // Accessibility function to announce percentage
   // const getAriaValueText = (value: number) => `${value} percent`;
 
@@ -85,11 +94,12 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                 <p className="text-gray-700">{entry.learning}</p>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {entry.teams && entry.teams.map((team, index) => (
-                  <div key={index} className="bg-gray-100 px-2 py-1 rounded-md text-sm">
-                    {team}
-                  </div>
-                ))}
+                {entry.teams &&
+                  entry.teams.map((team, index) => (
+                    <div key={index} className="bg-gray-100 px-2 py-1 rounded-md text-sm">
+                      {team}
+                    </div>
+                  ))}
               </div>
             </div>
           ))}
@@ -100,12 +110,15 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
   };
 
   return (
-    <section className="py-10 px-4 sm:px-6 lg:px-8 bg-gray-50" aria-labelledby="learning-section-title">
+    <section
+      className="py-10 px-4 sm:px-6 lg:px-8 bg-gray-50"
+      aria-labelledby="learning-section-title"
+    >
       <div className="max-w-6xl mx-auto">
         {/* Header with introduction */}
         <header className="mb-8 text-center sm:text-left">
-          <h2 
-            id="learning-section-title" 
+          <h2
+            id="learning-section-title"
             className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3"
           >
             Learning & Growth
@@ -121,7 +134,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
             <PieChart className="h-5 w-5 text-indigo-600 mr-2" aria-hidden="true" />
             Skills Overview
           </h3>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Currently Learning Panel */}
             {learning.currentlyLearning && learning.currentlyLearning.length > 0 && (
@@ -140,7 +153,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                     View all
                   </button> */}
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
                   {learning.currentlyLearning.slice(0, 5).map((item, index) => (
                     <span
@@ -176,7 +189,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                     View all
                   </button> */}
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
                   {learning.interestedIn.slice(0, 5).map((item, index) => (
                     <span
@@ -200,7 +213,9 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
         {/* Detailed Learning Cards - Collapsible */}
         <div className="space-y-4">
           {/* Technical Learnings */}
-          {(learning.technicalLearnings || (learning.technicalLearningEntries && learning.technicalLearningEntries.length > 0)) && (
+          {(learning.technicalLearnings ||
+            (learning.technicalLearningEntries &&
+              learning.technicalLearningEntries.length > 0)) && (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               <button
                 onClick={() => toggleSection('technical')}
@@ -218,7 +233,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                   <ChevronDown className="h-5 w-5 text-gray-500" aria-hidden="true" />
                 )}
               </button>
-              
+
               {expandedSections.technical && (
                 <div id="technical-content" className="p-5 border-t border-gray-200">
                   {renderTechnicalLearnings()}
@@ -238,7 +253,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
               >
                 <div className="flex items-center">
                   <Users className="h-5 w-5 text-blue-600 mr-3" aria-hidden="true" />
-                  <h3 className="text-lg font-medium text-gray-800">Soft Skills</h3>  
+                  <h3 className="text-lg font-medium text-gray-800">Soft Skills</h3>
                 </div>
                 {expandedSections.softSkills ? (
                   <ChevronUp className="h-5 w-5 text-gray-500" aria-hidden="true" />
@@ -246,7 +261,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                   <ChevronDown className="h-5 w-5 text-gray-500" aria-hidden="true" />
                 )}
               </button>
-              
+
               {expandedSections.softSkills && (
                 <div id="softSkills-content" className="p-5 border-t border-gray-200">
                   {renderSoftSkills()}
@@ -274,7 +289,7 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
                   <ChevronDown className="h-5 w-5 text-gray-500" aria-hidden="true" />
                 )}
               </button>
-              
+
               {expandedSections.collaboration && (
                 <div id="collaboration-content" className="p-5 border-t border-gray-200">
                   {renderCollaboration()}
@@ -434,6 +449,3 @@ const LearningGrowth: React.FC<LearningGrowthProps> = ({ learning }) => {
 };
 
 export default LearningGrowth;
-
-
-       

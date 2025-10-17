@@ -1,15 +1,8 @@
-import {
-  BasicInfo,
-  TechStack,
-  Learning,
-  Project,
-  PullRequest,
-  FormData,
-} from "@/types";
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { supabase } from "@/store/auth";
-import useAuthStore from "@/store/auth";
+import { BasicInfo, TechStack, Learning, Project, PullRequest, FormData } from '@/types';
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { supabase } from '@/store/auth';
+import useAuthStore from '@/store/auth';
 
 interface FormState {
   currentStep: number;
@@ -17,7 +10,7 @@ interface FormState {
   formData: FormData;
   isSubmitting: boolean;
   isComplete: boolean;
-  saveStatus: "idle" | "saving" | "success" | "error";
+  saveStatus: 'idle' | 'saving' | 'success' | 'error';
   saveError: string | null;
   isPublished: boolean;
   publishedUrl: string | null;
@@ -34,11 +27,7 @@ interface FormState {
   submitForm: () => Promise<void>;
   resetForm: () => void;
   addPR: (projectIndex: number, pr: PullRequest) => void;
-  updatePR: (
-    projectIndex: number,
-    prIndex: number,
-    pr: Partial<PullRequest>
-  ) => void;
+  updatePR: (projectIndex: number, prIndex: number, pr: Partial<PullRequest>) => void;
   removePR: (projectIndex: number, prIndex: number) => void;
   saveToSupabase: () => Promise<void>;
   loadFromSupabase: () => Promise<void>;
@@ -55,34 +44,34 @@ const useFormStore = create<FormState>()(
       totalSteps: 5, // Basic Info, Tech Stack, Learning, Projects, Review
       isSubmitting: false,
       isComplete: false,
-      saveStatus: "idle",
+      saveStatus: 'idle',
       saveError: null,
       isPublished: false,
       publishedUrl: null,
 
       formData: {
         basicInfo: {
-          fullName: "",
-          email: "",
-          internshipRole: "",
-          teamDepartment: "",
-          managerName: "",
-          startDate: "",
-          endDate: "",
-          summary: "",
-          teammates: [],
+          fullName: '',
+          email: '',
+          internshipRole: '',
+          teamDepartment: '',
+          managerName: '',
+          startDate: '',
+          endDate: '',
+          summary: '',
+          teammates: []
         },
         techStack: {
           languages: [],
           frameworks: [],
           tools: [],
-          other: "",
+          other: ''
         },
         learning: {
           currentlyLearning: [],
-          interestedIn: [],
+          interestedIn: []
         },
-        projects: [],
+        projects: []
       },
       isGeneratingAnalytics: false,
 
@@ -115,9 +104,9 @@ const useFormStore = create<FormState>()(
             ...state.formData,
             basicInfo: {
               ...state.formData.basicInfo,
-              ...data,
-            },
-          },
+              ...data
+            }
+          }
         }));
         // Save to Supabase after updating
         get().saveToSupabase();
@@ -129,9 +118,9 @@ const useFormStore = create<FormState>()(
             ...state.formData,
             techStack: {
               ...state.formData.techStack,
-              ...data,
-            },
-          },
+              ...data
+            }
+          }
         }));
         // Save to Supabase after updating
         get().saveToSupabase();
@@ -143,9 +132,9 @@ const useFormStore = create<FormState>()(
             ...state.formData,
             learning: {
               ...state.formData.learning,
-              ...data,
-            },
-          },
+              ...data
+            }
+          }
         }));
         // Save to Supabase after updating
         get().saveToSupabase();
@@ -155,14 +144,14 @@ const useFormStore = create<FormState>()(
         // Ensure project has pullRequests array initialized
         const projectWithPRs = {
           ...project,
-          pullRequests: project.pullRequests || [],
+          pullRequests: project.pullRequests || []
         };
 
         set((state) => ({
           formData: {
             ...state.formData,
-            projects: [...state.formData.projects, projectWithPRs],
-          },
+            projects: [...state.formData.projects, projectWithPRs]
+          }
         }));
         // Save to Supabase after updating
         get().saveToSupabase();
@@ -173,13 +162,13 @@ const useFormStore = create<FormState>()(
           const updatedProjects = [...state.formData.projects];
           updatedProjects[projectIndex] = {
             ...updatedProjects[projectIndex],
-            ...projectData,
+            ...projectData
           };
           return {
             formData: {
               ...state.formData,
-              projects: updatedProjects,
-            },
+              projects: updatedProjects
+            }
           };
         });
         // Save to Supabase after updating
@@ -190,8 +179,8 @@ const useFormStore = create<FormState>()(
         set((state) => ({
           formData: {
             ...state.formData,
-            projects: state.formData.projects.filter((_, i) => i !== index),
-          },
+            projects: state.formData.projects.filter((_, i) => i !== index)
+          }
         }));
         // Save to Supabase after updating
         get().saveToSupabase();
@@ -211,8 +200,8 @@ const useFormStore = create<FormState>()(
           return {
             formData: {
               ...state.formData,
-              projects: updatedProjects,
-            },
+              projects: updatedProjects
+            }
           };
         });
         // Save to Supabase after updating
@@ -229,15 +218,15 @@ const useFormStore = create<FormState>()(
           ) {
             updatedProjects[projectIndex].pullRequests[prIndex] = {
               ...updatedProjects[projectIndex].pullRequests[prIndex],
-              ...pr,
+              ...pr
             };
           }
 
           return {
             formData: {
               ...state.formData,
-              projects: updatedProjects,
-            },
+              projects: updatedProjects
+            }
           };
         });
         // Save to Supabase after updating
@@ -247,10 +236,7 @@ const useFormStore = create<FormState>()(
       removePR: (projectIndex: number, prIndex: number) => {
         set((state) => {
           const updatedProjects = [...state.formData.projects];
-          if (
-            updatedProjects[projectIndex] &&
-            updatedProjects[projectIndex].pullRequests
-          ) {
+          if (updatedProjects[projectIndex] && updatedProjects[projectIndex].pullRequests) {
             updatedProjects[projectIndex].pullRequests = updatedProjects[
               projectIndex
             ].pullRequests.filter((_, i) => i !== prIndex);
@@ -259,8 +245,8 @@ const useFormStore = create<FormState>()(
           return {
             formData: {
               ...state.formData,
-              projects: updatedProjects,
-            },
+              projects: updatedProjects
+            }
           };
         });
         // Save to Supabase after updating
@@ -284,7 +270,7 @@ const useFormStore = create<FormState>()(
         } catch (error: unknown) {
           set({ isSubmitting: false });
           const err = error as Error;
-          console.error("Error during form submission:", err);
+          console.error('Error during form submission:', err);
           return Promise.reject(err);
         }
       },
@@ -294,24 +280,24 @@ const useFormStore = create<FormState>()(
           currentStep: 1,
           isSubmitting: false,
           isComplete: false,
-          saveStatus: "idle",
+          saveStatus: 'idle',
           saveError: null,
           formData: {
             basicInfo: {
-              fullName: "",
-              email: "",
-              internshipRole: "",
-              teamDepartment: "",
-              managerName: "",
-              startDate: "",
-              endDate: "",
-              summary: "",
-              teammates: [],
+              fullName: '',
+              email: '',
+              internshipRole: '',
+              teamDepartment: '',
+              managerName: '',
+              startDate: '',
+              endDate: '',
+              summary: '',
+              teammates: []
             },
-            techStack: { languages: [], frameworks: [], tools: [], other: "" },
+            techStack: { languages: [], frameworks: [], tools: [], other: '' },
             learning: { currentlyLearning: [], interestedIn: [] },
-            projects: [],
-          },
+            projects: []
+          }
         });
       },
 
@@ -320,33 +306,33 @@ const useFormStore = create<FormState>()(
         const { user } = useAuthStore.getState();
 
         if (!user) {
-          console.warn("Cannot save form data: User not authenticated");
+          console.warn('Cannot save form data: User not authenticated');
           return;
         }
 
-        set({ saveStatus: "saving", saveError: null });
+        set({ saveStatus: 'saving', saveError: null });
 
         try {
-          const { error } = await supabase.from("intern_forms").upsert(
+          const { error } = await supabase.from('intern_forms').upsert(
             {
               user_id: user.id,
               form_data: get().formData,
-              updated_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
             },
             {
-              onConflict: "user_id",
+              onConflict: 'user_id'
             }
           );
 
           if (error) throw error;
 
-          set({ saveStatus: "success" });
+          set({ saveStatus: 'success' });
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("Error saving form data to Supabase:", err);
+          console.error('Error saving form data to Supabase:', err);
           set({
-            saveStatus: "error",
-            saveError: err.message || "Failed to save form data",
+            saveStatus: 'error',
+            saveError: err.message || 'Failed to save form data'
           });
         }
       },
@@ -355,24 +341,24 @@ const useFormStore = create<FormState>()(
         const { user } = useAuthStore.getState();
 
         if (!user) {
-          console.warn("Cannot load form data: User not authenticated");
+          console.warn('Cannot load form data: User not authenticated');
           return;
         }
 
-        set({ saveStatus: "saving", saveError: null });
+        set({ saveStatus: 'saving', saveError: null });
 
         try {
           // Get form data
           const { data, error } = await supabase
-            .from("intern_forms")
-            .select("form_data")
-            .eq("user_id", user.id)
+            .from('intern_forms')
+            .select('form_data')
+            .eq('user_id', user.id)
             .single();
 
           if (error) {
-            if (error.code === "PGRST116") {
+            if (error.code === 'PGRST116') {
               // No data found, this is fine for new users
-              set({ saveStatus: "idle" });
+              set({ saveStatus: 'idle' });
               return;
             }
             throw error;
@@ -380,12 +366,12 @@ const useFormStore = create<FormState>()(
 
           // Get portfolio ID and published status
           const { data: portfolioData, error: portfolioError } = await supabase
-            .from("user_portfolios")
-            .select("portfolio_id, is_published")
-            .eq("user_id", user.id)
+            .from('user_portfolios')
+            .select('portfolio_id, is_published')
+            .eq('user_id', user.id)
             .single();
 
-          if (portfolioError && portfolioError.code !== "PGRST116") {
+          if (portfolioError && portfolioError.code !== 'PGRST116') {
             throw portfolioError;
           }
 
@@ -397,15 +383,15 @@ const useFormStore = create<FormState>()(
                 portfolioData?.is_published && portfolioData?.portfolio_id
                   ? `${window.location.origin}/p/${portfolioData.portfolio_id}`
                   : null,
-              saveStatus: "success",
+              saveStatus: 'success'
             });
           }
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("Error loading form data from Supabase:", err);
+          console.error('Error loading form data from Supabase:', err);
           set({
-            saveStatus: "error",
-            saveError: err.message || "Failed to load form data",
+            saveStatus: 'error',
+            saveError: err.message || 'Failed to load form data'
           });
         }
       },
@@ -414,11 +400,11 @@ const useFormStore = create<FormState>()(
         const { user } = useAuthStore.getState();
 
         if (!user) {
-          throw new Error("User must be authenticated to publish portfolio");
+          throw new Error('User must be authenticated to publish portfolio');
         }
 
         try {
-          set({ saveStatus: "saving" });
+          set({ saveStatus: 'saving' });
 
           // First save the current form data
           await get().saveToSupabase();
@@ -427,14 +413,14 @@ const useFormStore = create<FormState>()(
           const { generatePortfolioId } = useAuthStore.getState();
 
           if (!generatePortfolioId) {
-            throw new Error("Portfolio ID generation function not available");
+            throw new Error('Portfolio ID generation function not available');
           }
 
           // Generate or retrieve portfolio ID
           const portfolioId = await generatePortfolioId();
 
           if (!portfolioId) {
-            throw new Error("Failed to generate portfolio ID");
+            throw new Error('Failed to generate portfolio ID');
           }
 
           // We'll skip updating the intern_forms table since it doesn't have an is_published column
@@ -442,9 +428,9 @@ const useFormStore = create<FormState>()(
 
           // Make sure user_portfolios is updated with is_published=true
           const { error: portfolioError } = await supabase
-            .from("user_portfolios")
+            .from('user_portfolios')
             .update({ is_published: true })
-            .eq("user_id", user.id);
+            .eq('user_id', user.id);
 
           if (portfolioError) throw portfolioError;
 
@@ -452,17 +438,17 @@ const useFormStore = create<FormState>()(
           set({
             isPublished: true,
             publishedUrl,
-            saveStatus: "success",
+            saveStatus: 'success'
           });
 
           return publishedUrl;
         } catch (error: unknown) {
           const err = error as Error;
-          const errorMessage = err.message || "Failed to publish portfolio";
-          console.error("Error publishing portfolio:", err, errorMessage);
+          const errorMessage = err.message || 'Failed to publish portfolio';
+          console.error('Error publishing portfolio:', err, errorMessage);
           set({
-            saveStatus: "error",
-            saveError: errorMessage,
+            saveStatus: 'error',
+            saveError: errorMessage
           });
           throw new Error(errorMessage);
         }
@@ -472,31 +458,31 @@ const useFormStore = create<FormState>()(
         const { user } = useAuthStore.getState();
 
         if (!user) {
-          throw new Error("User must be authenticated to unpublish portfolio");
+          throw new Error('User must be authenticated to unpublish portfolio');
         }
 
         try {
-          set({ saveStatus: "saving" });
+          set({ saveStatus: 'saving' });
 
           // Update the published status
           const { error } = await supabase
-            .from("user_portfolios")
+            .from('user_portfolios')
             .update({ is_published: false })
-            .eq("user_id", user.id);
+            .eq('user_id', user.id);
 
           if (error) throw error;
 
           set({
             isPublished: false,
             publishedUrl: null,
-            saveStatus: "success",
+            saveStatus: 'success'
           });
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("Error unpublishing portfolio:", err);
+          console.error('Error unpublishing portfolio:', err);
           set({
-            saveStatus: "error",
-            saveError: err.message || "Failed to unpublish portfolio",
+            saveStatus: 'error',
+            saveError: err.message || 'Failed to unpublish portfolio'
           });
           throw err;
         }
@@ -517,8 +503,8 @@ const useFormStore = create<FormState>()(
       }
     }),
     {
-      name: "form-storage",
-      storage: createJSONStorage(() => localStorage),
+      name: 'form-storage',
+      storage: createJSONStorage(() => localStorage)
     }
   )
 );

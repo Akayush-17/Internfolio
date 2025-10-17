@@ -46,14 +46,14 @@ export interface Learning {
   technicalLearnings?: string;
   softSkills?: SoftSkillEntry[];
   crossTeamCollaboration?: CollaborationEntry[];
-  technicalLearningEntries?: TechnicalLearningEntry[]; 
+  technicalLearningEntries?: TechnicalLearningEntry[];
 }
 
 export interface PullRequest {
   title: string;
   description: string;
   link?: string;
-  status: "Draft" | "Open" | "Merged" | "Closed";
+  status: 'Draft' | 'Open' | 'Merged' | 'Closed';
   date?: string;
 }
 
@@ -84,7 +84,7 @@ export interface Project {
   link?: string;
   pullRequests: PullRequest[];
   media?: {
-    type: "image" | "diagram" | "workflow" | "video";
+    type: 'image' | 'diagram' | 'workflow' | 'video';
     url: string;
     file?: File;
     caption?: string;
@@ -132,7 +132,7 @@ export interface GitHubPullRequest {
   title: string;
   body: string | null;
   html_url: string;
-  state: "open" | "closed";
+  state: 'open' | 'closed';
   merged_at: string | null;
   created_at: string;
   updated_at: string;

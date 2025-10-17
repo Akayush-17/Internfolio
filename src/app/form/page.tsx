@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import FormLayout from "@/components/form-layout";
-import useAuthStore from "@/store/auth";
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import FormLayout from '@/components/form-layout';
+import useAuthStore from '@/store/auth';
 
 export default function FormPage() {
   const router = useRouter();
@@ -12,15 +12,9 @@ export default function FormPage() {
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/");
+      router.push('/');
     }
   }, [isAuthenticated, router]);
 
-  return (
-    <main>
-      {isAuthenticated && (
-        <FormLayout />
-      )}
-    </main>
-  );
+  return <main>{isAuthenticated && <FormLayout />}</main>;
 }

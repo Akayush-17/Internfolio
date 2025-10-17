@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import MixpanelAnalytics from "@/components/mixpanel";
+import type { Metadata } from 'next';
+import './globals.css';
+import MixpanelAnalytics from '@/components/mixpanel';
 
 export const metadata: Metadata = {
-  title: "Internfolio",
-  description: "Create report for internship review nice and smooth",
+  title: 'Internfolio',
+  description: 'Create report for internship review nice and smooth'
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
