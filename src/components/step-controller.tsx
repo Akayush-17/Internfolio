@@ -22,7 +22,8 @@ const StepController: React.FC = () => {
       <motion.div
         className="flex justify-between items-center w-full mt-8"
         layout
-        transition={{ duration: 0.3 }}>
+        transition={{ duration: 0.3 }}
+      >
         {currentStep > 1 ? (
           <motion.button
             initial={{ opacity: 0, x: -10 }}
@@ -39,7 +40,8 @@ const StepController: React.FC = () => {
             onClick={prevStep}
             className="w-12 h-12 flex items-center justify-center text-gray-700 bg-white rounded-full hover:bg-gray-100 shadow-md disabled:opacity-50 disabled:pointer-events-none z-10"
             disabled={isSubmitting}
-            aria-label="Previous step">
+            aria-label="Previous step"
+          >
             <ChevronLeftIcon className="w-6 h-6" />
           </motion.button>
         ) : (
