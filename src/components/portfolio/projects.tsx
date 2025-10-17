@@ -14,6 +14,7 @@ import {
   X,
   Maximize2
 } from 'lucide-react';
+import { document } from '@/assets/assets';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -287,7 +288,7 @@ const Projects: React.FC<ProjectsProps> = ({ projects }) => {
                           {/* Document Image */}
                           <div className="w-full md:h-[180px]  rounded-md shadow-md overflow-hidden relative bg-blue-100">
                             <Image
-                              src="/document.png"
+                              src={document.src}
                               alt="Document"
                               className="w-full h-full object-contain"
                             />

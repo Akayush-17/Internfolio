@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { trackEvent } from '@/lib/mixpanel';
 import useAuthStore from '@/store/auth';
 import Image from 'next/image';
-import { google, github } from '@/assets/assets';
+import { google, github, laptop, headphone, bag } from '@/assets/assets';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -94,7 +94,7 @@ export default function LandingPage() {
       </motion.div>
 
       <motion.img
-        src="/laptops.png"
+        src={laptop.src}
         alt="Report preview"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -103,7 +103,7 @@ export default function LandingPage() {
       />
 
       <motion.img
-        src="/headphone.png"
+        src={headphone.src}
         alt="Headphones"
         initial={{ opacity: 0, x: -100 }}
         animate={{ opacity: 0.8, x: 0 }}
@@ -117,7 +117,7 @@ export default function LandingPage() {
       />
 
       <motion.img
-        src="/bag.png"
+        src={bag.src}
         alt="Bag"
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 0.8, x: 0 }}
