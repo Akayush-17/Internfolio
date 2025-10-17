@@ -1,14 +1,8 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import {
-  FaCode,
-  FaCodeBranch,
-  FaGithub,
-  FaRocket,
-  FaLaptopCode,
-} from "react-icons/fa";
-import { GitPullRequest } from "lucide-react";
-import { Project, TechStack, PullRequest } from "@/types";
+'use client';
+import React, { useEffect, useState, useCallback } from 'react';
+import { FaCode, FaCodeBranch, FaGithub, FaRocket, FaLaptopCode } from 'react-icons/fa';
+import { GitPullRequest } from 'lucide-react';
+import { Project, TechStack, PullRequest } from '@/types';
 
 interface StatItemProps {
   icon: React.ReactNode;
@@ -37,10 +31,7 @@ interface PortfolioStatsProps {
   projects: Project[];
 }
 
-const PortfolioStats: React.FC<PortfolioStatsProps> = ({
-  techStack,
-  projects,
-}) => {
+const PortfolioStats: React.FC<PortfolioStatsProps> = ({ techStack, projects }) => {
   const [contributionData, setContributionData] = useState<{
     count: number;
     data: ContributionData[];
@@ -50,17 +41,12 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
   const totalPRs = projects.reduce((count, project) => {
     return (
       count +
-      (project.pullRequests?.filter(
-        (pr) => !pr.link?.toLowerCase().includes("commit")
-      )?.length || 0)
+      (project.pullRequests?.filter((pr) => !pr.link?.toLowerCase().includes('commit'))?.length ||
+        0)
     );
   }, 0);
 
-  useEffect(() => {
-    calculateContributions();
-  }, [projects]);
-
-  const calculateContributions = () => {
+  const calculateContributions = useCallback(() => {
     const contributionsByDate = new Map<string, number>();
 
     const today = new Date();
@@ -70,7 +56,7 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
     // Fill all dates in the range with 0
     const currentDate = new Date(sixMonthsAgo);
     while (currentDate <= today) {
-      const dateString = currentDate.toISOString().split("T")[0];
+      const dateString = currentDate.toISOString().split('T')[0];
       contributionsByDate.set(dateString, 0);
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -78,24 +64,20 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
     projects.forEach((project) => {
       project.pullRequests?.forEach((pr: PullRequest) => {
         if (pr.date) {
-          const prDate = pr.date.split("T")[0];
+          const prDate = pr.date.split('T')[0];
           if (contributionsByDate.has(prDate)) {
-            contributionsByDate.set(
-              prDate,
-              (contributionsByDate.get(prDate) || 0) + 3 
-            );
+            contributionsByDate.set(prDate, (contributionsByDate.get(prDate) || 0) + 3);
           }
         }
       });
 
-      
       if (project.timelineStart && project.timelineEnd) {
         const start = new Date(project.timelineStart);
         const end = new Date(project.timelineEnd);
 
         const current = new Date(start);
         while (current <= end && current <= today) {
-          const dateString = current.toISOString().split("T")[0];
+          const dateString = current.toISOString().split('T')[0];
           if (contributionsByDate.has(dateString)) {
             const dayOfWeek = current.getDay();
             const isWeekday = dayOfWeek > 0 && dayOfWeek < 6;
@@ -118,9 +100,7 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
       0
     );
 
-    const maxContribution = Math.max(
-      ...Array.from(contributionsByDate.values())
-    );
+    const maxContribution = Math.max(...Array.from(contributionsByDate.values()));
 
     const formattedData = Array.from(contributionsByDate.entries())
       .map(([date, count]) => {
@@ -135,7 +115,7 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
         return {
           date,
           count,
-          level,
+          level
         };
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -144,9 +124,13 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
 
     setContributionData({
       count: totalContributions,
-      data: last182Days,
+      data: last182Days
     });
-  };
+  }, [projects]);
+
+  useEffect(() => {
+    calculateContributions();
+  }, [calculateContributions]);
 
   const getContributionCalendar = () => {
     const calendar: ContributionData[][] = [];
@@ -155,12 +139,12 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
     while (data.length < 26 * 7) {
       const lastDate = data.length > 0 ? new Date(data[0].date) : new Date();
       lastDate.setDate(lastDate.getDate() - 1);
-      const dateString = lastDate.toISOString().split("T")[0];
+      const dateString = lastDate.toISOString().split('T')[0];
 
       data.unshift({
         date: dateString,
         count: 0,
-        level: 0,
+        level: 0
       });
     }
 
@@ -226,9 +210,7 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
               <div>
                 <h3 className="text-lg font-semibold">Contribution Activity</h3>
                 <div className="text-sm text-gray-600">
-                  <span className="font-medium text-primary-600">
-                    {contributionData.count}
-                  </span>{" "}
+                  <span className="font-medium text-primary-600">{contributionData.count}</span>{' '}
                   contributions in the last 6 months
                 </div>
               </div>
@@ -242,7 +224,7 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
                   date.setMonth(date.getMonth() - 5 + i);
                   return (
                     <div key={i} className="text-xs text-gray-500 text-center">
-                      {date.toLocaleString("default", { month: "short" })}
+                      {date.toLocaleString('default', { month: 'short' })}
                     </div>
                   );
                 })}
@@ -250,23 +232,20 @@ const PortfolioStats: React.FC<PortfolioStatsProps> = ({
 
               <div className="w-full">
                 {contributionCalendar.map((dayData, dayOfWeek) => (
-                  <div
-                    key={dayOfWeek}
-                    className="flex justify-between w-full mb-1"
-                  >
+                  <div key={dayOfWeek} className="flex justify-between w-full mb-1">
                     {dayData.map((day, weekIndex) => (
                       <div
                         key={weekIndex}
                         className={`w-3 h-3 rounded-sm ${
                           day.level === 0
-                            ? "bg-gray-200"
+                            ? 'bg-gray-200'
                             : day.level === 1
-                            ? "bg-green-200"
-                            : day.level === 2
-                            ? "bg-green-300"
-                            : day.level === 3
-                            ? "bg-green-500"
-                            : "bg-green-700"
+                              ? 'bg-green-200'
+                              : day.level === 2
+                                ? 'bg-green-300'
+                                : day.level === 3
+                                  ? 'bg-green-500'
+                                  : 'bg-green-700'
                         }`}
                         title={`${day.count} contributions on ${day.date}`}
                       />

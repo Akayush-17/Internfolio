@@ -1,6 +1,6 @@
-import React from "react";
-import { Mail, User } from "lucide-react";
-import { BasicInfo as BasicInfoType } from "@/types";
+import React from 'react';
+import { Mail, User } from 'lucide-react';
+import { BasicInfo as BasicInfoType } from '@/types';
 
 interface BasicInfoProps {
   basicInfo: BasicInfoType;
@@ -16,12 +16,12 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ basicInfo }) => {
         </span>
       </p>
       <h1 className="text-3xl font-bold leading-tight mb-8 max-w-[80%] lg:text-5xl lg:max-w-[90%] md:text-4xl sm:text-3xl sm:max-w-full bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-        {basicInfo.internshipRole} in{" "}
+        {basicInfo.internshipRole} in{' '}
         <span className="text-blue-500">{basicInfo.teamDepartment} Team</span>
       </h1>
       <div className="text-lg mb-8 text-gray-600 leading-relaxed sm:text-base">
         {basicInfo.summary ||
-          "A passionate designer focused on creating intuitive and beautiful user experiences."}
+          'A passionate designer focused on creating intuitive and beautiful user experiences.'}
       </div>
 
       {/* Display contact information */}
@@ -37,9 +37,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ basicInfo }) => {
 
       {basicInfo.teammates && basicInfo.teammates.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-xl font-semibold mb-3 border-b pb-2 sm:text-lg">
-            Team Members:
-          </h3>
+          <h3 className="text-xl font-semibold mb-3 border-b pb-2 sm:text-lg">Team Members:</h3>
           <div className="flex flex-wrap gap-4">
             {basicInfo.teammates.map((teammate, index) => (
               <div

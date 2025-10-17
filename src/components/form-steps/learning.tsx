@@ -1,22 +1,26 @@
-import React, { useState } from "react";
-import useFormStore from "@/store/useFormStore";
-import { TechnicalLearningEntry, CollaborationEntry, SoftSkillEntry } from "@/types";
-import { PlusCircle, Trash2 } from "lucide-react";
+import React, { useState } from 'react';
+import useFormStore from '@/store/useFormStore';
+import { TechnicalLearningEntry, CollaborationEntry, SoftSkillEntry } from '@/types';
+import { PlusCircle, Trash2 } from 'lucide-react';
 
 const Learning: React.FC = () => {
   const { formData, updateLearning } = useFormStore();
   const { learning } = formData;
-  const [activeTab, setActiveTab] = useState<"technical" | "softSkills" | "collaboration">("technical");
-  
+  const [activeTab, setActiveTab] = useState<'technical' | 'softSkills' | 'collaboration'>(
+    'technical'
+  );
+
   // State for managing new entries
-  const [newEntry, setNewEntry] = useState<TechnicalLearningEntry | SoftSkillEntry | CollaborationEntry>({
-    title: "",
-    context: "",
-    learning: ""
+  const [newEntry, setNewEntry] = useState<
+    TechnicalLearningEntry | SoftSkillEntry | CollaborationEntry
+  >({
+    title: '',
+    context: '',
+    learning: ''
   });
 
   if (!learning) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   // Helper function to handle array updates
@@ -30,15 +34,21 @@ const Learning: React.FC = () => {
   };
 
   // Handle entry input changes
-  const handleEntryChange = (field: keyof TechnicalLearningEntry | keyof SoftSkillEntry | keyof CollaborationEntry, value: string) => {
-    if (field === "teams" && activeTab === "collaboration") {
+  const handleEntryChange = (
+    field: keyof TechnicalLearningEntry | keyof SoftSkillEntry | keyof CollaborationEntry,
+    value: string
+  ) => {
+    if (field === 'teams' && activeTab === 'collaboration') {
       // Handle teams as an array
-      setNewEntry(prev => ({
+      setNewEntry((prev) => ({
         ...prev,
-        [field]: value.split(',').map(team => team.trim()).filter(team => team !== '')
+        [field]: value
+          .split(',')
+          .map((team) => team.trim())
+          .filter((team) => team !== '')
       }));
     } else {
-      setNewEntry(prev => ({
+      setNewEntry((prev) => ({
         ...prev,
         [field]: value
       }));
@@ -47,18 +57,18 @@ const Learning: React.FC = () => {
 
   // Reset the entry form
   const resetEntryForm = () => {
-    if (activeTab === "collaboration") {
+    if (activeTab === 'collaboration') {
       setNewEntry({
-        title: "",
-        context: "",
-        learning: "",
-        teams: [],
+        title: '',
+        context: '',
+        learning: '',
+        teams: []
       });
     } else {
       setNewEntry({
-        title: "",
-        context: "",
-        learning: ""
+        title: '',
+        context: '',
+        learning: ''
       });
     }
   };
@@ -68,7 +78,7 @@ const Learning: React.FC = () => {
     if (newEntry.title && newEntry.learning) {
       const currentEntries = learning.technicalLearningEntries || [];
       updateLearning({
-        technicalLearningEntries: [...currentEntries, {...newEntry}]
+        technicalLearningEntries: [...currentEntries, { ...newEntry }]
       });
       resetEntryForm();
     }
@@ -88,7 +98,7 @@ const Learning: React.FC = () => {
     if (newEntry.title && newEntry.learning) {
       const currentEntries = learning.softSkills || [];
       updateLearning({
-        softSkills: [...currentEntries, {...newEntry}]
+        softSkills: [...currentEntries, { ...newEntry }]
       });
       resetEntryForm();
     }
@@ -109,7 +119,7 @@ const Learning: React.FC = () => {
       const currentEntries = learning.crossTeamCollaboration || [];
       // Fix: Update the correct field (crossTeamCollaboration, not softSkills)
       updateLearning({
-        crossTeamCollaboration: [...currentEntries, {...newEntry}]
+        crossTeamCollaboration: [...currentEntries, { ...newEntry }]
       });
       resetEntryForm();
     }
@@ -130,27 +140,27 @@ const Learning: React.FC = () => {
 
   // Learning options
   const learningOptions = [
-    "Machine Learning",
-    "Blockchain",
-    "Web3",
-    "Mobile Development",
-    "Cloud Computing",
-    "DevOps",
-    "UI/UX Design",
-    "Data Science",
-    "Cybersecurity",
+    'Machine Learning',
+    'Blockchain',
+    'Web3',
+    'Mobile Development',
+    'Cloud Computing',
+    'DevOps',
+    'UI/UX Design',
+    'Data Science',
+    'Cybersecurity'
   ];
 
   // Handle adding a new entry based on the active tab
   const handleAddEntry = () => {
     switch (activeTab) {
-      case "technical":
+      case 'technical':
         addTechnicalLearningEntry();
         break;
-      case "softSkills":
+      case 'softSkills':
         addSoftSkillEntry();
         break;
-      case "collaboration":
+      case 'collaboration':
         addCollaborationEntry();
         break;
     }
@@ -159,16 +169,17 @@ const Learning: React.FC = () => {
   // Render entries based on active tab
   const renderEntries = () => {
     switch (activeTab) {
-      case "technical":
+      case 'technical':
         return (
-          learning.technicalLearningEntries && learning.technicalLearningEntries.length > 0 && (
+          learning.technicalLearningEntries &&
+          learning.technicalLearningEntries.length > 0 && (
             <div className="mb-4 space-y-4">
               {learning.technicalLearningEntries.map((entry, index) => (
                 <div key={index} className="p-4 border border-gray-200 rounded-md bg-gray-50">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium">{entry.title}</h4>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => removeTechnicalLearningEntry(index)}
                       className="text-red-500 hover:text-red-700"
                     >
@@ -187,16 +198,17 @@ const Learning: React.FC = () => {
             </div>
           )
         );
-      case "softSkills":
+      case 'softSkills':
         return (
-          Array.isArray(learning.softSkills) && learning.softSkills.length > 0 && (
+          Array.isArray(learning.softSkills) &&
+          learning.softSkills.length > 0 && (
             <div className="mb-4 space-y-4">
               {learning.softSkills.map((entry, index) => (
                 <div key={index} className="p-4 border border-gray-200 rounded-md bg-gray-50">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium">{entry.title}</h4>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => removeSoftSkillEntry(index)}
                       className="text-red-500 hover:text-red-700"
                     >
@@ -215,16 +227,17 @@ const Learning: React.FC = () => {
             </div>
           )
         );
-      case "collaboration":
+      case 'collaboration':
         return (
-          Array.isArray(learning.crossTeamCollaboration) && learning.crossTeamCollaboration.length > 0 && (
+          Array.isArray(learning.crossTeamCollaboration) &&
+          learning.crossTeamCollaboration.length > 0 && (
             <div className="mb-4 space-y-4">
               {learning.crossTeamCollaboration.map((entry, index) => (
                 <div key={index} className="p-4 border border-gray-200 rounded-md bg-gray-50">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium">{entry.title}</h4>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => removeCollaborationEntry(index)}
                       className="text-red-500 hover:text-red-700"
                     >
@@ -258,36 +271,36 @@ const Learning: React.FC = () => {
   // Get the title for the form based on active tab
   const getFormTitle = () => {
     switch (activeTab) {
-      case "technical":
-        return "Add New Technical Learning";
-      case "softSkills":
-        return "Add New Soft Skills Learning";
-      case "collaboration":
-        return "Add New Cross-Team Collaboration";
+      case 'technical':
+        return 'Add New Technical Learning';
+      case 'softSkills':
+        return 'Add New Soft Skills Learning';
+      case 'collaboration':
+        return 'Add New Cross-Team Collaboration';
     }
   };
 
   // Get the section title based on active tab
   const getSectionTitle = () => {
     switch (activeTab) {
-      case "technical":
-        return "Technical Learnings";
-      case "softSkills":
-        return "Soft Skills Learnings";
-      case "collaboration":
-        return "Cross-Team Collaboration";
+      case 'technical':
+        return 'Technical Learnings';
+      case 'softSkills':
+        return 'Soft Skills Learnings';
+      case 'collaboration':
+        return 'Cross-Team Collaboration';
     }
   };
 
   // Get the section description based on active tab
   const getSectionDescription = () => {
     switch (activeTab) {
-      case "technical":
-        return "Add your technical learning experiences";
-      case "softSkills":
-        return "Add your soft skills learning experiences that made you grow as a person";
-      case "collaboration":
-        return "Describe any collaboration with other teams or departments";
+      case 'technical':
+        return 'Add your technical learning experiences';
+      case 'softSkills':
+        return 'Add your soft skills learning experiences that made you grow as a person';
+      case 'collaboration':
+        return 'Describe any collaboration with other teams or departments';
     }
   };
 
@@ -295,9 +308,7 @@ const Learning: React.FC = () => {
     <div className="space-y-6">
       {/* Common learning sections */}
       <div>
-        <h3 className="mb-3 text-lg font-medium">
-          What are you currently learning?
-        </h3>
+        <h3 className="mb-3 text-lg font-medium">What are you currently learning?</h3>
         <div className="grid grid-cols-3 gap-2">
           {learningOptions.map((option) => (
             <div key={`learning-${option}`} className="flex items-center">
@@ -305,9 +316,7 @@ const Learning: React.FC = () => {
                 type="checkbox"
                 id={`learning-${option}`}
                 checked={learning.currentlyLearning?.includes(option) || false}
-                onChange={() =>
-                  handleArrayUpdate("currentlyLearning", option)
-                }
+                onChange={() => handleArrayUpdate('currentlyLearning', option)}
                 className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor={`learning-${option}`}>{option}</label>
@@ -321,12 +330,9 @@ const Learning: React.FC = () => {
             placeholder="Other (please specify)"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onKeyDown={(e) => {
-              if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                handleArrayUpdate(
-                  "currentlyLearning",
-                  e.currentTarget.value.trim()
-                );
-                e.currentTarget.value = "";
+              if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                handleArrayUpdate('currentlyLearning', e.currentTarget.value.trim());
+                e.currentTarget.value = '';
               }
             }}
           />
@@ -334,9 +340,7 @@ const Learning: React.FC = () => {
       </div>
 
       <div>
-        <h3 className="mb-3 text-lg font-medium">
-          What are you interested in learning next?
-        </h3>
+        <h3 className="mb-3 text-lg font-medium">What are you interested in learning next?</h3>
         <div className="grid grid-cols-3 gap-2">
           {learningOptions.map((option) => (
             <div key={`interested-${option}`} className="flex items-center">
@@ -344,7 +348,7 @@ const Learning: React.FC = () => {
                 type="checkbox"
                 id={`interested-${option}`}
                 checked={learning.interestedIn?.includes(option) || false}
-                onChange={() => handleArrayUpdate("interestedIn", option)}
+                onChange={() => handleArrayUpdate('interestedIn', option)}
                 className="w-4 h-4 mr-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor={`interested-${option}`}>{option}</label>
@@ -358,12 +362,9 @@ const Learning: React.FC = () => {
             placeholder="Other (please specify)"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onKeyDown={(e) => {
-              if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                handleArrayUpdate(
-                  "interestedIn",
-                  e.currentTarget.value.trim()
-                );
-                e.currentTarget.value = "";
+              if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                handleArrayUpdate('interestedIn', e.currentTarget.value.trim());
+                e.currentTarget.value = '';
               }
             }}
           />
@@ -374,31 +375,31 @@ const Learning: React.FC = () => {
       <div className="mb-4 border-b border-gray-200">
         <div className="flex -mb-px">
           <button
-            onClick={() => setActiveTab("technical")}
+            onClick={() => setActiveTab('technical')}
             className={`py-2 px-4 font-medium text-sm focus:outline-none ${
-              activeTab === "technical"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent"
+              activeTab === 'technical'
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent'
             }`}
           >
             Technical Learning
           </button>
           <button
-            onClick={() => setActiveTab("softSkills")}
+            onClick={() => setActiveTab('softSkills')}
             className={`py-2 px-4 font-medium text-sm focus:outline-none ${
-              activeTab === "softSkills"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent"
+              activeTab === 'softSkills'
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent'
             }`}
           >
             Soft Skills
           </button>
           <button
-            onClick={() => setActiveTab("collaboration")}
+            onClick={() => setActiveTab('collaboration')}
             className={`py-2 px-4 font-medium text-sm focus:outline-none ${
-              activeTab === "collaboration"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent"
+              activeTab === 'collaboration'
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent'
             }`}
           >
             Cross-Team Collaboration
@@ -409,13 +410,11 @@ const Learning: React.FC = () => {
       {/* Tab Content */}
       <div>
         <h3 className="mb-3 text-lg font-medium">{getSectionTitle()}</h3>
-        <p className="mb-2 text-sm text-gray-600">
-          {getSectionDescription()}
-        </p>
-        
+        <p className="mb-2 text-sm text-gray-600">{getSectionDescription()}</p>
+
         {/* Display entries for the active tab */}
         {renderEntries()}
-        
+
         {/* Form to add new entries */}
         <div className="space-y-3 border border-gray-200 rounded-md p-4 bg-white">
           <h4 className="font-medium">{getFormTitle()}</h4>
@@ -427,18 +426,18 @@ const Learning: React.FC = () => {
               id="title"
               type="text"
               value={newEntry.title}
-              onChange={(e) => handleEntryChange("title", e.target.value)}
+              onChange={(e) => handleEntryChange('title', e.target.value)}
               placeholder={
-                activeTab === "technical" 
-                  ? "e.g., Generic vs Specific Design" 
-                  : activeTab === "softSkills" 
-                    ? "e.g., Emotional Intelligence" 
-                    : "e.g., Worked with the design team on UI components"
+                activeTab === 'technical'
+                  ? 'e.g., Generic vs Specific Design'
+                  : activeTab === 'softSkills'
+                    ? 'e.g., Emotional Intelligence'
+                    : 'e.g., Worked with the design team on UI components'
               }
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
             <label htmlFor="context" className="block text-sm font-medium text-gray-700 mb-1">
               Context (What happened?)
@@ -446,19 +445,19 @@ const Learning: React.FC = () => {
             <textarea
               id="context"
               value={newEntry.context}
-              onChange={(e) => handleEntryChange("context", e.target.value)}
+              onChange={(e) => handleEntryChange('context', e.target.value)}
               placeholder={
-                activeTab === "technical" 
-                  ? "e.g., In one of the Acko Clinic initial meetings..." 
-                  : activeTab === "softSkills" 
-                    ? "e.g., I learned to be more patient and understanding..." 
-                    : "e.g., I needed to coordinate with the UX team to implement..."
+                activeTab === 'technical'
+                  ? 'e.g., In one of the Acko Clinic initial meetings...'
+                  : activeTab === 'softSkills'
+                    ? 'e.g., I learned to be more patient and understanding...'
+                    : 'e.g., I needed to coordinate with the UX team to implement...'
               }
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={3}
             />
           </div>
-          
+
           <div>
             <label htmlFor="learning" className="block text-sm font-medium text-gray-700 mb-1">
               What did you learn?
@@ -466,15 +465,15 @@ const Learning: React.FC = () => {
             <textarea
               id="learning"
               value={newEntry.learning}
-              onChange={(e) => handleEntryChange("learning", e.target.value)}
+              onChange={(e) => handleEntryChange('learning', e.target.value)}
               placeholder="e.g., This made me realize the importance of thinking at a platform level..."
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={3}
             />
           </div>
-          
+
           {/* Teams field only for collaboration tab */}
-          {activeTab === "collaboration" && (
+          {activeTab === 'collaboration' && (
             <div>
               <label htmlFor="teams" className="block text-sm font-medium text-gray-700 mb-1">
                 Teams (comma separated)
@@ -482,18 +481,21 @@ const Learning: React.FC = () => {
               <input
                 id="teams"
                 type="text"
-                value={isCollaborationEntry(newEntry) ? 
-                  (Array.isArray(newEntry.teams) ? newEntry.teams.join(", ") : "") : 
-                  ""
+                value={
+                  isCollaborationEntry(newEntry)
+                    ? Array.isArray(newEntry.teams)
+                      ? newEntry.teams.join(', ')
+                      : ''
+                    : ''
                 }
-                onChange={(e) => handleEntryChange("teams", e.target.value)}
+                onChange={(e) => handleEntryChange('teams', e.target.value)}
                 placeholder="e.g., Design, Engineering, Product"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <p className="text-xs text-gray-500 mt-1">Enter team names separated by commas</p>
             </div>
           )}
-          
+
           <button
             type="button"
             onClick={handleAddEntry}

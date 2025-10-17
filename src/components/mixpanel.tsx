@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -14,9 +13,9 @@ export default function MixpanelAnalytics() {
 
   useEffect(() => {
     if (pathname) {
-      trackEvent("Page Viewed", { page: pathname });
+      trackEvent('Page Viewed', { page: pathname });
     }
   }, [pathname]);
 
-  return null; 
+  return null;
 }

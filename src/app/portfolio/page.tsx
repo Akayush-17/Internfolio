@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useEffect } from "react";
-import PortfolioLayout from "@/components/portfolio";
-import useAuthStore from "@/store/auth";
-import { useRouter } from "next/navigation";
+import React, { useEffect } from 'react';
+import PortfolioLayout from '@/components/portfolio';
+import useAuthStore from '@/store/auth';
+import { useRouter } from 'next/navigation';
 
 export default function PortfolioPage() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
@@ -15,7 +15,7 @@ export default function PortfolioPage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/");
+      router.push('/');
     }
   }, [isLoading, isAuthenticated, router]);
 

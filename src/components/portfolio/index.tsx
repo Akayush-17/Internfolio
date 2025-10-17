@@ -1,19 +1,14 @@
-import React, { useState } from "react";
-import Link from "next/link";
-import BasicInfo from "./basic-info";
-import PortfolioStats from "./stats";
-import Projects from "./projects";
-import useFormStore from "@/store/useFormStore";
-import LearningGrowth from "./learning-growth";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import BasicInfo from './basic-info';
+import PortfolioStats from './stats';
+import Projects from './projects';
+import useFormStore from '@/store/useFormStore';
+import LearningGrowth from './learning-growth';
 
 const Portfolio = () => {
-  const {
-    formData,
-    isPublished,
-    publishedUrl,
-    publishPortfolio,
-    unpublishPortfolio,
-  } = useFormStore();
+  const { formData, isPublished, publishedUrl, publishPortfolio, unpublishPortfolio } =
+    useFormStore();
   const [publishing, setPublishing] = useState(false);
 
   const handlePublish = async () => {
@@ -21,7 +16,7 @@ const Portfolio = () => {
     try {
       await publishPortfolio();
     } catch (error) {
-      console.error("Failed to publish portfolio:", error);
+      console.error('Failed to publish portfolio:', error);
     } finally {
       setPublishing(false);
     }
@@ -32,7 +27,7 @@ const Portfolio = () => {
     try {
       await unpublishPortfolio();
     } catch (error) {
-      console.error("Failed to unpublish portfolio:", error);
+      console.error('Failed to unpublish portfolio:', error);
     } finally {
       setPublishing(false);
     }
@@ -68,9 +63,7 @@ const Portfolio = () => {
       <Projects projects={formData.projects} />
       <LearningGrowth learning={formData.learning} />
       <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-lg max-w-3xl mx-auto">
-        <h3 className="text-2xl font-semibold mb-4 text-center">
-          Share Your Portfolio
-        </h3>
+        <h3 className="text-2xl font-semibold mb-4 text-center">Share Your Portfolio</h3>
 
         {isPublished ? (
           <div className="space-y-4">
@@ -78,14 +71,12 @@ const Portfolio = () => {
               <div className="relative w-full">
                 <input
                   type="text"
-                  value={publishedUrl || ""}
+                  value={publishedUrl || ''}
                   readOnly
                   className="w-full p-3 pr-24 bg-white rounded text-gray-600 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
-                  onClick={() =>
-                    navigator.clipboard.writeText(publishedUrl || "")
-                  }
+                  onClick={() => navigator.clipboard.writeText(publishedUrl || '')}
                   className="absolute right-1 top-1 bg-blue-100 hover:bg-blue-200 px-4 py-2 rounded transition-colors duration-200 text-sm font-medium"
                 >
                   Copy Link
@@ -200,8 +191,8 @@ const Portfolio = () => {
 
         <p className="mt-4 text-sm text-gray-400 text-center">
           {isPublished
-            ? "Your portfolio is public. Anyone with the link can view it."
-            : "Publish your portfolio to get a shareable link."}
+            ? 'Your portfolio is public. Anyone with the link can view it.'
+            : 'Publish your portfolio to get a shareable link.'}
         </p>
       </div>
 

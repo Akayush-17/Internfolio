@@ -1,9 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createClient } from '@supabase/supabase-js';
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -48,16 +48,16 @@ const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           const {
-            data: { session },
+            data: { session }
           } = await supabase.auth.getSession();
 
           if (session?.user) {
             const provider = session.user.app_metadata?.provider || null;
-            
+
             const { data } = await supabase
-              .from("user_portfolios")
-              .select("portfolio_id")
-              .eq("user_id", session.user.id)
+              .from('user_portfolios')
+              .select('portfolio_id')
+              .eq('user_id', session.user.id)
               .single();
 
             set({
@@ -65,24 +65,24 @@ const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               isLoading: false,
               portfolioId: data?.portfolio_id || null,
-              authProvider: provider,
+              authProvider: provider
             });
           } else {
             set({
               user: null,
               isAuthenticated: false,
               isLoading: false,
-              authProvider: null,
+              authProvider: null
             });
           }
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("Auth check error:", err);
+          console.error('Auth check error:', err);
           set({
-            error: "Failed to check authentication status",
+            error: 'Failed to check authentication status',
             isLoading: false,
             isAuthenticated: false,
-            authProvider: null,
+            authProvider: null
           });
         }
       },
@@ -91,19 +91,19 @@ const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           const { error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
+            provider: 'google',
             options: {
-              redirectTo: `${window.location.origin}/auth/callback`,
-            },
+              redirectTo: `${window.location.origin}/auth/callback`
+            }
           });
 
           if (error) throw error;
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("Google sign-in error:", err);
+          console.error('Google sign-in error:', err);
           set({
-            error: err.message || "Failed to sign in with Google",
-            isLoading: false,
+            error: err.message || 'Failed to sign in with Google',
+            isLoading: false
           });
         }
       },
@@ -113,19 +113,19 @@ const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           const { error } = await supabase.auth.signInWithOAuth({
-            provider: "github",
+            provider: 'github',
             options: {
-              redirectTo: `${window.location.origin}/auth/callback`,
-            },
+              redirectTo: `${window.location.origin}/auth/callback`
+            }
           });
 
           if (error) throw error;
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("GitHub sign-in error:", err);
+          console.error('GitHub sign-in error:', err);
           set({
-            error: err.message || "Failed to sign in with GitHub",
-            isLoading: false,
+            error: err.message || 'Failed to sign in with GitHub',
+            isLoading: false
           });
         }
       },
@@ -142,12 +142,12 @@ const useAuthStore = create<AuthState>()(
             user: null,
             isAuthenticated: false,
             isLoading: false,
-            authProvider: null,
+            authProvider: null
           });
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("Sign-out error:", err);
-          set({ error: err.message || "Failed to sign out", isLoading: false });
+          console.error('Sign-out error:', err);
+          set({ error: err.message || 'Failed to sign out', isLoading: false });
         }
       },
 
@@ -155,9 +155,7 @@ const useAuthStore = create<AuthState>()(
         const { user } = get();
 
         if (!user) {
-          throw new Error(
-            "User must be authenticated to generate portfolio ID"
-          );
+          throw new Error('User must be authenticated to generate portfolio ID');
         }
 
         try {
@@ -165,14 +163,14 @@ const useAuthStore = create<AuthState>()(
           const portfolioId = Math.random().toString(36).substring(2, 10);
 
           // Save to database
-          const { error } = await supabase.from("user_portfolios").upsert(
+          const { error } = await supabase.from('user_portfolios').upsert(
             {
               user_id: user.id,
               portfolio_id: portfolioId,
               is_published: true,
-              created_at: new Date().toISOString(),
+              created_at: new Date().toISOString()
             },
-            { onConflict: "user_id" }
+            { onConflict: 'user_id' }
           );
 
           if (error) throw error;
@@ -183,20 +181,20 @@ const useAuthStore = create<AuthState>()(
           return portfolioId;
         } catch (error: unknown) {
           const err = error as Error;
-          console.error("Error generating portfolio ID:", err);
+          console.error('Error generating portfolio ID:', err);
           throw err;
         }
-      },
+      }
     }),
     {
-      name: "auth-storage",
+      name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         portfolioId: state.portfolioId,
-        authProvider: state.authProvider,
-      }),
+        authProvider: state.authProvider
+      })
     }
   )
 );
